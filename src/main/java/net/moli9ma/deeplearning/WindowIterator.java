@@ -10,8 +10,8 @@ public class WindowIterator implements Iterable<Window>, Iterator<Window> {
     private final int maxY;
 
     // Window幅&高さ
-    private final int height;
     private final int width;
+    private final int height;
 
     // stride
     private final int strideX;
@@ -20,11 +20,11 @@ public class WindowIterator implements Iterable<Window>, Iterator<Window> {
     // Window
     private Window window;
 
-    public WindowIterator(int maxX, int maxY, int height, int width, int strideX, int strideY) {
+    public WindowIterator(int maxX, int maxY, int width, int height, int strideX, int strideY) {
         this.maxX = maxX;
         this.maxY = maxY;
-        this.height = height;
         this.width = width;
+        this.height = height;
         this.strideX = strideX;
         this.strideY = strideY;
     }

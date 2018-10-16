@@ -5,7 +5,6 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.INDArrayIndex;
 
-import static net.moli9ma.deeplearning.ConvolutionUtil.getPadded;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.nd4j.linalg.indexing.NDArrayIndex.all;
 import static org.nd4j.linalg.indexing.NDArrayIndex.point;
@@ -15,7 +14,92 @@ public class ConvolutionUtilTest {
 
 
     @Test
+    void hoge() {
+        INDArray input = Nd4j.create(new double[][]{
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 9},
+        });
+
+        int[] padWidth = new int[]{
+                2,
+                2,
+                2,
+                2
+        };
+        input = Nd4j.pad(input, new int[][] {{2, 2}, {2, 1}, {3, 1}, {3, 1}},  Nd4j.PadMode.CONSTANT);
+        System.out.println(input);
+    }
+
+
+    @Test
     void Im2col() {
+
+        {
+            int kH = 2;
+            int kW = 2;
+            int sX = 1;
+            int sY = 1;
+            int pX = 0;
+            int pY = 0;
+
+            // input
+            int height = 3;
+            int width = 3;
+            INDArray input = Nd4j.create(new double[][]{
+                    {1, 2, 3},
+                    {4, 5, 6},
+                    {7, 8, 9},
+            });
+
+            ConvolutionParameter parameter = new ConvolutionParameter(width, height, kH, kW, pY, pX, sX, sY);
+            INDArray arr = ConvolutionUtil.Im2col(input, parameter);
+            INDArray expected = Nd4j.create(new double[][]{
+                    {1, 2, 4, 5},
+                    {2, 3, 5, 6},
+                    {4, 5, 7, 8},
+                    {5, 6, 8, 9}
+            });
+            assertEquals(expected, arr);
+        }
+
+
+        {
+            int kH = 2;
+            int kW = 2;
+            int sX = 1;
+            int sY = 1;
+            int pX = 0;
+            int pY = 0;
+
+            // input
+            int height = 3;
+            int width = 4;
+            INDArray input = Nd4j.create(new double[][]{
+                    {1, 2, 3, 4},
+                    {5, 6, 7, 8},
+                    {9, 10, 11, 12},
+            });
+
+            ConvolutionParameter parameter = new ConvolutionParameter(width, height, kH, kW, pY, pX, sX, sY);
+            INDArray arr = ConvolutionUtil.Im2col(input, parameter);
+            INDArray expected = Nd4j.create(new double[][]{
+                    {1, 2, 5, 6},
+                    {2, 3, 6, 7},
+                    {3, 4, 7, 8},
+                    {5, 6, 9, 10},
+                    {6, 7, 10, 11},
+                    {7, 8, 11, 12}
+            });
+            assertEquals(expected, arr);
+        }
+    }
+
+    @Test
+    void convolution2D() {
+
+        int height = 3;
+        int width = 3;
 
         int kH = 2;
         int kW = 2;
@@ -24,20 +108,84 @@ public class ConvolutionUtilTest {
         int pX = 0;
         int pY = 0;
 
-        // input
-        int height = 3;
-        int width = 3;
-        INDArray v1 = Nd4j.create(new double[][]{
-                {1, 2, 3},
-                {2, 3, 4},
-                {3, 4, 5},
+        ConvolutionParameter parameter = new ConvolutionParameter(height, width, kH, kW, pY, pX, sX, sY);
+
+        // kernel
+        // kernel patternA
+        INDArray kernel = Nd4j.create(new double[][]{
+                {1, 1},
+                {1, 1}
         });
 
+        //Input data: shape [miniBatch,depth,height,width]
+        INDArray input = Nd4j.create(new double[][]{
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 9}
+        });
+
+        INDArray result = ConvolutionUtil.Convolution2D(input, kernel, parameter);
+
+        INDArray expected = Nd4j.create(new double[][]{
+                {12, 16},
+                {24, 28}
+        });
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void convolution3D() {
+
+        int height = 3;
+        int width = 3;
+
+        int kH = 2;
+        int kW = 2;
+        int sX = 1;
+        int sY = 1;
+        int pX = 0;
+        int pY = 0;
+
+        int depth = 2;
+
         ConvolutionParameter parameter = new ConvolutionParameter(height, width, kH, kW, pY, pX, sX, sY);
-        INDArray paddedInput = getPadded(v1, parameter);
-        INDArray arr = ConvolutionUtil.Im2col(paddedInput, parameter);
-        INDArray expected = Nd4j.create(new double[]{1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5}, new int[]{4, 4});
-        assertEquals(expected, arr);
+
+        // kernel
+        // kernel patternA
+        INDArray kernel = Nd4j.create(new double[][][]{
+                {
+                        {1, 2},
+                        {3, 4}
+                },
+                {
+                        {5, 6},
+                        {7, 8}
+                },
+        });
+
+        //Input data: shape [miniBatch,depth,height,width]
+        INDArray input = Nd4j.create(new double[][][]{
+                {
+                        {1, 2, 3},
+                        {4, 5, 6},
+                        {7, 8, 9}
+                },
+                {
+                        {1, 2, 3},
+                        {4, 5, 6},
+                        {7, 8, 9}
+                }
+        });
+
+        INDArray result = ConvolutionUtil.Convolution3D(input, kernel, depth, parameter);
+
+        INDArray expected = Nd4j.create(new double[][]{
+                {122, 158},
+                {230, 266}
+        });
+
+        assertEquals(expected, result);
     }
 
 
@@ -95,6 +243,18 @@ public class ConvolutionUtilTest {
         input.put(new INDArrayIndex[]{point(1), point(1), all(), all()}, data);
 
         INDArray result = ConvolutionUtil.Convolution4D(input, kernel, miniBatch, depth, parameter);
-        System.out.println(result);
+        INDArray expected = Nd4j.create(new double[][][]{
+                {
+                        {189.0000, 216.0000, 243.0000},
+                        {324.0000, 351.0000, 378.0000},
+                        {459.0000, 486.0000, 513.0000},
+                },
+                {
+                        {189.0000, 216.0000, 243.0000},
+                        {324.0000, 351.0000, 378.0000},
+                        {459.0000, 486.0000, 513.0000},
+                },
+        });
+        assertEquals(expected, result);
     }
 }
