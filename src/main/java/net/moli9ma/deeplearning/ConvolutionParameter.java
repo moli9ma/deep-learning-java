@@ -57,6 +57,14 @@ public class ConvolutionParameter {
         return strideY;
     }
 
+    public int getInputHeightWithPadding() {
+        return getInputHeight() + (2 * getPaddingHeight());
+    }
+
+    public int getInputWidthWithPadding() {
+        return getInputWidth() + (2 * getPaddingWidth());
+    }
+
     public int getOutputHeight() {
         return (this.inputHeight + (2 * this.paddingHeight) - this.kernelHeight) / this.strideY + 1;
     }

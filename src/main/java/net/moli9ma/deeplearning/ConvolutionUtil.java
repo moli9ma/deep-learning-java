@@ -47,20 +47,17 @@ public class ConvolutionUtil {
     public static INDArray Im2col(INDArray input, ConvolutionParameter convolutionParameter) {
 
         // Padding
-        if (!convolutionParameter.isPaddingAvailable()) {
-            return input;
-        } else {
-            int[] padWidth = new int[]{
-                    convolutionParameter.getPaddingWidth(),
-                    convolutionParameter.getPaddingHeight()
+        if (convolutionParameter.isPaddingAvailable()) {
+            int[][] padWidth = new int[][]{
+                    {convolutionParameter.getPaddingHeight(), convolutionParameter.getPaddingHeight()},
+                    {convolutionParameter.getPaddingWidth(), convolutionParameter.getPaddingWidth()}
             };
             input = Nd4j.pad(input, padWidth,  Nd4j.PadMode.CONSTANT);
         }
 
-
         WindowIterator iterator = new WindowIterator (
-                convolutionParameter.getInputWidth(),
-                convolutionParameter.getInputHeight(),
+                convolutionParameter.getInputWidthWithPadding(),
+                convolutionParameter.getInputHeightWithPadding(),
                 convolutionParameter.getKernelWidth(),
                 convolutionParameter.getKernelHeight(),
                 convolutionParameter.getStrideX(),

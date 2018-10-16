@@ -14,25 +14,6 @@ public class ConvolutionUtilTest {
 
 
     @Test
-    void hoge() {
-        INDArray input = Nd4j.create(new double[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9},
-        });
-
-        int[] padWidth = new int[]{
-                2,
-                2,
-                2,
-                2
-        };
-        input = Nd4j.pad(input, new int[][] {{2, 2}, {2, 1}, {3, 1}, {3, 1}},  Nd4j.PadMode.CONSTANT);
-        System.out.println(input);
-    }
-
-
-    @Test
     void Im2col() {
 
         {
@@ -93,45 +74,115 @@ public class ConvolutionUtilTest {
             });
             assertEquals(expected, arr);
         }
+
+        // padding
+        {
+            int kH = 3;
+            int kW = 3;
+            int sX = 1;
+            int sY = 1;
+            int pX = 1;
+            int pY = 1;
+
+            // input
+            int height = 2;
+            int width = 2;
+            INDArray input = Nd4j.create(new double[][]{
+                    {1, 2},
+                    {3, 4}
+            });
+
+            ConvolutionParameter parameter = new ConvolutionParameter(width, height, kH, kW, pY, pX, sX, sY);
+            INDArray arr = ConvolutionUtil.Im2col(input, parameter);
+
+            INDArray expected = Nd4j.create(new double[][]{
+                    {0, 0, 0, 0, 1.0000, 2.0000, 0, 3.0000, 4.0000},
+                    {0, 0, 0, 1.0000, 2.0000, 0, 3.0000, 4.0000, 0},
+                    {0, 1.0000, 2.0000, 0, 3.0000, 4.0000, 0, 0, 0},
+                    {1.0000, 2.0000, 0, 3.0000, 4.0000, 0, 0, 0, 0}
+            });
+            assertEquals(expected, arr);
+        }
     }
 
     @Test
     void convolution2D() {
 
-        int height = 3;
-        int width = 3;
+        {
+            int height = 3;
+            int width = 3;
 
-        int kH = 2;
-        int kW = 2;
-        int sX = 1;
-        int sY = 1;
-        int pX = 0;
-        int pY = 0;
+            int kH = 2;
+            int kW = 2;
+            int sX = 1;
+            int sY = 1;
+            int pX = 0;
+            int pY = 0;
 
-        ConvolutionParameter parameter = new ConvolutionParameter(height, width, kH, kW, pY, pX, sX, sY);
+            ConvolutionParameter parameter = new ConvolutionParameter(height, width, kH, kW, pY, pX, sX, sY);
 
-        // kernel
-        // kernel patternA
-        INDArray kernel = Nd4j.create(new double[][]{
-                {1, 1},
-                {1, 1}
-        });
+            // kernel
+            // kernel patternA
+            INDArray kernel = Nd4j.create(new double[][]{
+                    {1, 1},
+                    {1, 1}
+            });
 
-        //Input data: shape [miniBatch,depth,height,width]
-        INDArray input = Nd4j.create(new double[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
-        });
+            //Input data: shape [miniBatch,depth,height,width]
+            INDArray input = Nd4j.create(new double[][]{
+                    {1, 2, 3},
+                    {4, 5, 6},
+                    {7, 8, 9}
+            });
 
-        INDArray result = ConvolutionUtil.Convolution2D(input, kernel, parameter);
+            INDArray result = ConvolutionUtil.Convolution2D(input, kernel, parameter);
 
-        INDArray expected = Nd4j.create(new double[][]{
-                {12, 16},
-                {24, 28}
-        });
+            INDArray expected = Nd4j.create(new double[][]{
+                    {12, 16},
+                    {24, 28}
+            });
 
-        assertEquals(expected, result);
+            assertEquals(expected, result);
+        }
+
+        // padding
+        {
+            int height = 2;
+            int width = 2;
+
+            int kH = 2;
+            int kW = 2;
+            int sX = 1;
+            int sY = 1;
+            int pX = 1;
+            int pY = 1;
+
+            ConvolutionParameter parameter = new ConvolutionParameter(height, width, kH, kW, pY, pX, sX, sY);
+
+            // kernel
+            // kernel patternA
+            INDArray kernel = Nd4j.create(new double[][]{
+                    {1, 1},
+                    {1, 1}
+            });
+
+            //Input data: shape [miniBatch,depth,height,width]
+            INDArray input = Nd4j.create(new double[][]{
+                    {1, 2},
+                    {3, 4}
+            });
+
+            INDArray result = ConvolutionUtil.Convolution2D(input, kernel, parameter);
+
+            System.out.println(result);
+
+            INDArray expected = Nd4j.create(new double[][]{
+                    {1.0000, 3.0000, 2.0000},
+                    {4.0000, 10.0000, 6.0000},
+                    {3.0000, 7.0000, 4.0000}
+            });
+            assertEquals(expected, result);
+        }
     }
 
     @Test
@@ -229,12 +280,12 @@ public class ConvolutionUtilTest {
 
         //Input data: shape [miniBatch,depth,height,width]
         INDArray data = Nd4j.create(new double[][]{
-                        {1, 2, 3, 4, 5},
-                        {6, 7, 8, 9, 10},
-                        {11, 12, 13, 14, 15},
-                        {16, 17, 18, 19, 20},
-                        {21, 22, 23, 24, 25}
-                });
+                {1, 2, 3, 4, 5},
+                {6, 7, 8, 9, 10},
+                {11, 12, 13, 14, 15},
+                {16, 17, 18, 19, 20},
+                {21, 22, 23, 24, 25}
+        });
 
         INDArray input = Nd4j.create(new int[]{miniBatch, depth, height, width}, 'c');
         input.put(new INDArrayIndex[]{point(0), point(0), all(), all()}, data);
