@@ -2,13 +2,33 @@ package net.moli9ma.deeplearning;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.INDArrayIndex;
 import org.nd4j.linalg.ops.transforms.Transforms;
 
 import java.util.function.BiFunction;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
+
+import static org.nd4j.linalg.indexing.NDArrayIndex.point;
 
 public class NdUtil {
 
+    /**
+     * sigmoid関数
+     *
+     * @param input
+     * @return
+     */
+    public static INDArray Sigmoid(INDArray input) {
+        return Transforms.exp(input.neg()).add(1.0).rdiv(1.0);
+    }
+
+    /**
+     * Softmax
+     *
+     * @param input
+     * @return
+     */
     public static INDArray Softmax(INDArray input) {
         double sum = Transforms.exp(input).sumNumber().doubleValue();
         return Transforms.exp(input).div(sum);
@@ -44,7 +64,8 @@ public class NdUtil {
 
 
     /**
-     *
+     * 引数を2つ取る関数f(x0, x1)に対する勾配を返却します。
+     * 勾配とは、各変数に対する偏微分の結果をベクトルとしてまとめたものです。
      *
      * @param function
      * @param input
@@ -60,8 +81,44 @@ public class NdUtil {
         Function<Double, Double> function4x1 = x -> function.apply(x0, x);
         double r2 = NdUtil.NumericalDiff(function4x1, x1);
 
-        return Nd4j.create(new double[]{
-                r1,r2
-        });
+        return Nd4j.create(new double[]{r1,r2});
+    }
+
+    public static INDArray NumericalGradient(Function<INDArray, Double> f, INDArray x) {
+        long rows = x.size(0);
+        long cols = x.size(1);
+        double h = 1e-4;
+        INDArray grad = Nd4j.zerosLike(x);
+        for (int r = 0; r < rows; ++r)
+            for (int c = 0; c < cols; ++c) {
+                double tmp_val = x.getDouble(r, c);
+                x.putScalar(r, c, tmp_val + h);
+                double fxh1 = f.apply(x);
+                x.putScalar(r, c, tmp_val - h);
+                double fxh2 = f.apply(x);
+                double g = (fxh1 - fxh2) / (2.0 * h);
+                grad.putScalar(r, c, g);
+                x.putScalar(r, c, tmp_val);
+            }
+        return grad;
+    }
+
+
+    /**
+     * 勾配下降法で、最小値を探索します。
+     *
+     * @param function
+     * @param init
+     * @param learningRate
+     * @param stepNumber
+     * @return
+     */
+    public static INDArray GradientDecent(BiFunction<Double, Double, Double> function, INDArray init, double learningRate, int stepNumber) {
+        INDArray x = init;
+        for (int i = 0; i < stepNumber; i++) {
+            INDArray grad = NumericalGradient2D(function, x);
+            x = x.sub(grad.mul(learningRate));
+        }
+        return x;
     }
 }

@@ -13,6 +13,18 @@ import static org.nd4j.linalg.indexing.NDArrayIndex.point;
 
 public class NdUtilTest {
 
+
+    @Test
+    void sigmoid() {
+        {
+            INDArray input = Nd4j.create(new double[]{-1.0, 1.0, 2.0});
+            INDArray result = NdUtil.Sigmoid(input);
+            assertEquals(0.2689414322376251, result.getDouble(0));
+            assertEquals(0.7310585975646973, result.getDouble(1));
+            assertEquals(0.8807970285415649, result.getDouble(2));
+        }
+    }
+
     @Test
     void Softmax() {
 
@@ -78,12 +90,56 @@ public class NdUtilTest {
         // f1(x0, x1)=x0^2 + x1^1
         BiFunction<Double, Double, Double> function = (x0, x1) -> Math.pow(x0, 2) + Math.pow(x1, 2);
 
-        INDArray input = Nd4j.create(new double[]{
-                3.0, 4.0,
-        });
+        {
+            INDArray input = Nd4j.create(new double[]{3.0, 4.0,});
+            INDArray result = NdUtil.NumericalGradient2D(function, input);
+            assertEquals(6.0, result.getDouble(0));
+            assertEquals(8.0, result.getDouble(1));
+        }
 
-        INDArray result = NdUtil.NumericalGradient2D(function, input);
-        assertEquals(6.0, result.getDouble(0));
-        assertEquals(8.0, result.getDouble(1));
+        {
+            INDArray input = Nd4j.create(new double[]{0.0, 2.0,});
+            INDArray result = NdUtil.NumericalGradient2D(function, input);
+            assertEquals(0.0, result.getDouble(0));
+            assertEquals(4.0, result.getDouble(1));
+        }
+
+        {
+            INDArray input = Nd4j.create(new double[]{3.0, 0.0,});
+            INDArray result = NdUtil.NumericalGradient2D(function, input);
+            assertEquals(6.0, result.getDouble(0));
+            assertEquals(0.0, result.getDouble(1));
+        }
     }
+
+
+    @Test
+    void NumericalGradient() {
+
+        // f1(x0, x1)=x0^2 + x1^1
+        Function<INDArray , Double> function = (x) -> Math.pow(x.getDouble(0), 2) + Math.pow(x.getDouble(1), 2);
+
+        {
+            INDArray input = Nd4j.create(new double[]{3.0, 0.0,});
+            INDArray result = NdUtil.NumericalGradient(function, input);
+            System.out.println(result);
+        }
+    }
+
+
+    @Test
+    void GradientDecent() {
+
+        // f1(x0, x1)=x0^2 + x1^1
+        BiFunction<Double, Double, Double> function = (x0, x1) -> Math.pow(x0, 2) + Math.pow(x1, 2);
+
+        {
+            final double learningRate = 0.02;
+            final int stepNumber = 100;
+            INDArray input = Nd4j.create(new double[]{-3.0, 4.0});
+            INDArray result = NdUtil.GradientDecent(function, input, learningRate, stepNumber);
+            System.out.println(result);
+        }
+    }
+
 }
