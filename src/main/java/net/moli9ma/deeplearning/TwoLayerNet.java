@@ -7,24 +7,19 @@ import java.util.function.Function;
 
 public class TwoLayerNet {
 
+    TwolayerNetParameter parameter;
 
-    INDArray weight1;
-    INDArray bias1;
-
-    INDArray weight2;
-    INDArray bias2;
-
-    /**
-     * @param weight1 重み1
-     * @param bias1   バイアス1
-     * @param weight2 重み2
-     * @param bias2   バイアス2
-     */
     public TwoLayerNet(INDArray weight1, INDArray bias1, INDArray weight2, INDArray bias2) {
-        this.weight1 = weight1;
-        this.bias1 = bias1;
-        this.weight2 = weight2;
-        this.bias2 = bias2;
+        parameter = new TwolayerNetParameter(weight1, bias1, weight2, bias2);
+    }
+
+    public TwoLayerNet(int inputSize, int hiddenSize, int outputSize, double weightInitStd) {
+        INDArray weight1 = Nd4j.rand(inputSize, hiddenSize).mul(weightInitStd);
+        INDArray weight2 = Nd4j.rand(hiddenSize, outputSize).mul(weightInitStd);
+
+        INDArray bias1 = Nd4j.zeros(hiddenSize);
+        INDArray bias2 = Nd4j.zeros(outputSize);
+        parameter = new TwolayerNetParameter(weight1, bias1, weight2, bias2);
     }
 
     /**
@@ -35,10 +30,10 @@ public class TwoLayerNet {
      */
     public INDArray predict(INDArray input) {
 
-        INDArray result1 = input.mmul(weight1).addRowVector(bias1);
+        INDArray result1 = input.mmul(this.parameter.weight1).addRowVector(this.parameter.bias1);
         INDArray sigResult1 = NdUtil.Sigmoid(result1);
 
-        INDArray result2 = sigResult1.mmul(weight2).addRowVector(bias2);
+        INDArray result2 = sigResult1.mmul(this.parameter.weight2).addRowVector(this.parameter.bias2);
         INDArray softmaxResult2 = NdUtil.Softmax(result2);
 
         return softmaxResult2;
@@ -81,18 +76,19 @@ public class TwoLayerNet {
     }
 
     /**
-     *
+     * 勾配を計算
      *
      * @param x 入力データ
      * @param t 教師データ
      * @return
      */
-    public void numericalGradient(INDArray x, INDArray t) {
+    public TwolayerNetParameter numericalGradient(INDArray x, INDArray t) {
         Function<INDArray, Double> lossFunc = w -> this.loss(x, t);
-        this.weight1 = NdUtil.NumericalGradient(lossFunc, this.weight1);
-        this.bias1 = NdUtil.NumericalGradient(lossFunc, this.bias1);
-        this.weight2 = NdUtil.NumericalGradient(lossFunc, this.weight2);
-        this.bias2 = NdUtil.NumericalGradient(lossFunc, this.bias2);
+        INDArray weight1 = NdUtil.NumericalGradient(lossFunc, this.parameter.weight1);
+        INDArray bias1 = NdUtil.NumericalGradient(lossFunc, this.parameter.bias1);
+        INDArray weight2 = NdUtil.NumericalGradient(lossFunc, this.parameter.weight2);
+        INDArray bias2 = NdUtil.NumericalGradient(lossFunc, this.parameter.bias2);
+        return new TwolayerNetParameter(weight1, bias1, weight2, bias2);
     }
 
 }

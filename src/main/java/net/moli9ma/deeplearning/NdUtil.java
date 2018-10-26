@@ -84,6 +84,13 @@ public class NdUtil {
         return Nd4j.create(new double[]{r1,r2});
     }
 
+    /**
+     * 関数fに対する勾配を返却します。
+     *
+     * @param f
+     * @param x
+     * @return
+     */
     public static INDArray NumericalGradient(Function<INDArray, Double> f, INDArray x) {
         long rows = x.size(0);
         long cols = x.size(1);
