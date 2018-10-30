@@ -1,6 +1,5 @@
 package net.moli9ma.deeplearning;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
@@ -63,7 +62,6 @@ public class TwoLayerNetTest {
     }
 
 
-    @Ignore
     @Test
     public void miniBatch() throws IOException {
 

@@ -1,6 +1,10 @@
 package net.moli9ma.deeplearning;
 
 import org.junit.jupiter.api.Test;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.BooleanIndexing;
+import org.nd4j.linalg.indexing.conditions.Conditions;
 
 import java.math.BigDecimal;
 
