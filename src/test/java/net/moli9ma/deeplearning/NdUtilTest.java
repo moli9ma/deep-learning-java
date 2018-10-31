@@ -29,7 +29,7 @@ public class NdUtilTest {
     void Softmax() {
 
         {
-            INDArray matrixA = Nd4j.create(new double[]{0.3, 2.9, 4.0},new int[]{1,3});
+            INDArray matrixA = Nd4j.create(new double[]{0.3, 0.9, 4.0},new int[]{1,3});
             INDArray result = NdUtil.Softmax(matrixA);
             System.out.println(result);
         }
