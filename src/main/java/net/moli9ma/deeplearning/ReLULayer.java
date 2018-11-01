@@ -4,14 +4,17 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.BooleanIndexing;
 import org.nd4j.linalg.indexing.conditions.Conditions;
+import org.nd4j.linalg.ops.transforms.Transforms;
 
-public class ReLULayer {
+public class ReLULayer implements Layer {
 
     // 入力の要素が0以下ならばTrue, それ以外(0より大きい要素)をFalseとして保持する
     INDArray mask;
 
     public ReLULayer() { }
 
+/*
+    @Override
     public INDArray forward(INDArray x) {
 
         // create mask array
@@ -22,8 +25,26 @@ public class ReLULayer {
 
         return x.mul(mask);
     }
+*/
 
+/*
+    @Override
     public INDArray backward(INDArray x) {
         return x.mul(mask);
     }
+*/
+
+    @Override
+    public INDArray forward(INDArray x) {
+        // 要素の値＞0.0の時は1、それ以外の時は0をmaskに格納します。
+        // "gt"は"greater than"の意味です。
+        this.mask = x.gt(0.0);
+        return Transforms.relu(x);
+    }
+
+    @Override
+    public INDArray backward(INDArray dout) {
+        return dout.mul(mask);
+    }
+
 }

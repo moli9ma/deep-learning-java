@@ -31,7 +31,14 @@ public class NdUtilTest {
         {
             INDArray matrixA = Nd4j.create(new double[]{0.3, 0.9, 4.0},new int[]{1,3});
             INDArray result = NdUtil.Softmax(matrixA);
-            System.out.println(result);
+            assertEquals("[[    0.0231,    0.0421,    0.9348]]", result.toString());
+        }
+
+        {
+            INDArray matrixA = Nd4j.create(new double[][]{{0.3, 0.9, 4.0},{0.1, 0.2, 0.3}});
+            INDArray result = NdUtil.Softmax(matrixA);
+            assertEquals("[[    0.0217,    0.0396,    0.8794], \n" +
+                    " [    0.0178,    0.0197,    0.0217]]", result.toString());
         }
     }
 
@@ -49,6 +56,13 @@ public class NdUtilTest {
             INDArray t = Nd4j.create(new double[] {0, 0, 1, 0, 0, 0, 0, 0, 0, 0});
             INDArray y = Nd4j.create(new double[] {0.1, 0.05, 0.1, 0.0, 0.05, 0.1, 0.0, 0.6, 0.0, 0.0});
             assertEquals(2.3025840929945458, NdUtil.CrossEntropyError(y, t), 5e-6);
+        }
+
+        {
+
+            INDArray t = Nd4j.create(new double[][] {{0, 0, 1, 0, 0}, {0, 0, 0, 0, 1}});
+            INDArray y = Nd4j.create(new double[][] {{0.1, 0.05, 0.1, 0.0, 0.05}, {0.1, 0.0, 0.6, 0.0, 0.0}});
+            assertEquals(18.420679092407227, NdUtil.CrossEntropyError(y, t), 5e-6);
         }
     }
 

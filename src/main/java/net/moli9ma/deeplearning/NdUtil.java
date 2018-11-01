@@ -3,6 +3,7 @@ package net.moli9ma.deeplearning;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.INDArrayIndex;
+import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.nd4j.linalg.ops.transforms.Transforms;
 
 import java.util.function.BiFunction;
@@ -44,8 +45,9 @@ public class NdUtil {
      * @return
      */
     public static double CrossEntropyError(INDArray input, INDArray t) {
+        long batch_size = input.size(0);
         double delta = 1e-7;
-        return -t.mul(Transforms.log(input.add(delta))).sumNumber().doubleValue();
+        return -t.mul(Transforms.log(input.add(delta))).sumNumber().doubleValue() / batch_size;
     }
 
 
@@ -128,4 +130,15 @@ public class NdUtil {
         }
         return x;
     }
+
+    /**
+     * INDArrayの平均値を求めます
+     *
+     * @param x
+     * @return
+     */
+    public static double average(INDArray x) {
+        return x.sumNumber().doubleValue() / x.length();
+    }
+
 }
