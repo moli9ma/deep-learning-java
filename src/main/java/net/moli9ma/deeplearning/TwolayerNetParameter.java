@@ -4,11 +4,11 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 public class TwolayerNetParameter {
 
-    INDArray weight1;
-    INDArray bias1;
+    public INDArray weight1;
+    public INDArray bias1;
 
-    INDArray weight2;
-    INDArray bias2;
+    public INDArray weight2;
+    public INDArray bias2;
 
     /**
      * @param weight1 重み1

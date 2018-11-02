@@ -1,8 +1,8 @@
-package net.moli9ma.deeplearning;
+package net.moli9ma.deeplearning.layer;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-interface Layer {
+public interface Layer {
     INDArray forward(INDArray x);
     INDArray backward(INDArray x);
 }

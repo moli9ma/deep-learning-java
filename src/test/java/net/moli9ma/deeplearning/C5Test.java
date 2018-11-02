@@ -1,5 +1,9 @@
 package net.moli9ma.deeplearning;
 
+import net.moli9ma.deeplearning.layer.AddLayer;
+import net.moli9ma.deeplearning.layer.AddLayerData;
+import net.moli9ma.deeplearning.layer.MulLayer;
+import net.moli9ma.deeplearning.layer.MulLayerData;
 import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;

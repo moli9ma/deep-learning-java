@@ -1,10 +1,8 @@
-package net.moli9ma.deeplearning;
-
-import org.apache.commons.math3.analysis.function.Add;
+package net.moli9ma.deeplearning.layer;
 
 public class AddLayer {
 
-    AddLayerData data;
+    public AddLayerData data;
 
     public AddLayer() {
     }

@@ -1,8 +1,7 @@
-package net.moli9ma.deeplearning;
+package net.moli9ma.deeplearning.layer;
 
+import net.moli9ma.deeplearning.layer.Layer;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.cpu.nativecpu.NDArray;
-import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.ops.transforms.Transforms;
 
 public class SigmoidLayer implements Layer {

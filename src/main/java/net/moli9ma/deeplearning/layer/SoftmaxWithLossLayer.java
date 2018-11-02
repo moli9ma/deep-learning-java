@@ -1,5 +1,7 @@
-package net.moli9ma.deeplearning;
+package net.moli9ma.deeplearning.layer;
 
+import net.moli9ma.deeplearning.NdUtil;
+import net.moli9ma.deeplearning.layer.LastLayer;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.ops.transforms.Transforms;
 
@@ -8,17 +10,17 @@ public class SoftmaxWithLossLayer implements LastLayer {
     /**
      * 損失
      */
-    double loss;
+    public double loss;
 
     /**
      * softmaxの出力
      */
-    INDArray y;
+    public INDArray y;
 
     /**
      * 教師データ
      */
-    INDArray t;
+    public INDArray t;
 
 
     @Override

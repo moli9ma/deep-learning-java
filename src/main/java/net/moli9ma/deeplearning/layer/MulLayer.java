@@ -1,4 +1,4 @@
-package net.moli9ma.deeplearning;
+package net.moli9ma.deeplearning.layer;
 
 public class MulLayer {
 

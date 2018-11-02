@@ -6,10 +6,9 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.Test;
+import net.moli9ma.deeplearning.optimizer.StochasticGradientDescentOptimizer;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.indexing.INDArrayIndex;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +37,7 @@ public class C6Test extends Application {
         HashMap<String, INDArray> params = new HashMap<>();
         params.put("w1", parameter);
 
-        StochasticGradientDescent descent = new StochasticGradientDescent(0.2);
+        StochasticGradientDescentOptimizer descent = new StochasticGradientDescentOptimizer(0.2);
 
 
         List<INDArray> results = new ArrayList<>();

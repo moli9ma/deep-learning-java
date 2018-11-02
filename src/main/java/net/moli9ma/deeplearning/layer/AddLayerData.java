@@ -1,8 +1,8 @@
-package net.moli9ma.deeplearning;
+package net.moli9ma.deeplearning.layer;
 
 public class AddLayerData {
-    double x;
-    double y;
+    public double x;
+    public double y;
 
     public AddLayerData(double x, double y) {
         this.x = x;

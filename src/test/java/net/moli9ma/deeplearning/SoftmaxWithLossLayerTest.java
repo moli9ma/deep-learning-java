@@ -1,5 +1,6 @@
 package net.moli9ma.deeplearning;
 
+import net.moli9ma.deeplearning.layer.SoftmaxWithLossLayer;
 import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;

@@ -1,5 +1,7 @@
 package net.moli9ma.deeplearning;
 
+import net.moli9ma.deeplearning.layer.AddLayer;
+import net.moli9ma.deeplearning.layer.AddLayerData;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

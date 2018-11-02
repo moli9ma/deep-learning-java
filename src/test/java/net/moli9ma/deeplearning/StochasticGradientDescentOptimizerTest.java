@@ -1,5 +1,6 @@
 package net.moli9ma.deeplearning;
 
+import net.moli9ma.deeplearning.optimizer.StochasticGradientDescentOptimizer;
 import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -8,7 +9,7 @@ import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class StochasticGradientDescentTest {
+public class StochasticGradientDescentOptimizerTest {
 
     @Test
     void t1() {
@@ -26,7 +27,7 @@ public class StochasticGradientDescentTest {
                 Nd4j.ones(2, 2)
         );
 
-        StochasticGradientDescent sgd =  new StochasticGradientDescent();
+        StochasticGradientDescentOptimizer sgd =  new StochasticGradientDescentOptimizer();
         sgd.update(params, grads);
 
         assertEquals("[[    0.9900,    0.9900], \n" +
@@ -54,7 +55,7 @@ public class StochasticGradientDescentTest {
         grads.put("bias1", Nd4j.ones(2, 2));
         grads.put("bias2", Nd4j.ones(2, 2));
 
-        StochasticGradientDescent sgd =  new StochasticGradientDescent();
+        StochasticGradientDescentOptimizer sgd =  new StochasticGradientDescentOptimizer();
         sgd.update(params, grads);
 
         assertEquals("[[    0.9900,    0.9900], \n" +
