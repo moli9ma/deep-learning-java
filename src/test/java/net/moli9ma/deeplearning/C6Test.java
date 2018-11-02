@@ -39,7 +39,6 @@ public class C6Test extends Application {
 
         StochasticGradientDescentOptimizer descent = new StochasticGradientDescentOptimizer(0.2);
 
-
         List<INDArray> results = new ArrayList<>();
 
         for (int i = 0; i < iterateNum; i++) {
