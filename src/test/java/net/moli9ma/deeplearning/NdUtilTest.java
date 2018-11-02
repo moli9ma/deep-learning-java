@@ -134,7 +134,7 @@ public class NdUtilTest {
         Function<INDArray , Double> function = (x) -> Math.pow(x.getDouble(0), 2) + Math.pow(x.getDouble(1), 2);
 
         {
-            INDArray input = Nd4j.create(new double[]{3.0, 0.0,});
+            INDArray input = Nd4j.create(new double[]{3.0, 1.0,});
             INDArray result = NdUtil.NumericalGradient(function, input);
             System.out.println(result);
         }

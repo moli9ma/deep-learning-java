@@ -12,14 +12,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Function;
 
-public class OptimizedTwoLayerNet {
+public class TwoLayerNetBackPropagation {
 
     TwolayerNetParameter parameter;
     LinkedHashMap<String, Layer> layers;
     LastLayer lastLayer;
 
 
-    public OptimizedTwoLayerNet(int inputSize, int hiddenSize, int outputSize, double weightInitStd) {
+    public TwoLayerNetBackPropagation(int inputSize, int hiddenSize, int outputSize, double weightInitStd) {
 
         Random r = new DefaultRandom(0);
         INDArray weight1 = r.nextGaussian(new int[] {inputSize, hiddenSize}).mul(weightInitStd);

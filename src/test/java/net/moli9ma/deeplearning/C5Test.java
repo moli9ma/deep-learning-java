@@ -5,7 +5,6 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.ops.transforms.Transforms;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,7 +72,7 @@ public class C5Test {
         INDArray x_train = train.normalizedImages();
         INDArray t_train = train.oneHotLabels();
 
-        OptimizedTwoLayerNet network = new OptimizedTwoLayerNet(784, 50, 10, 0.01);
+        TwoLayerNetBackPropagation network = new TwoLayerNetBackPropagation(784, 50, 10, 0.01);
 
         // ミニバッチの取得
         int batch_size = 1;
@@ -138,7 +137,7 @@ public class C5Test {
         // ミニバッチの取得
         DataSet ds = new DataSet(x_train, t_train);
 
-        OptimizedTwoLayerNet network = new OptimizedTwoLayerNet(784, 50, 10, 0.01D);
+        TwoLayerNetBackPropagation network = new TwoLayerNetBackPropagation(784, 50, 10, 0.01D);
 
         // batch_size分のデータをランダムに取り出します。
         for (int i = 0; i < iters_num; ++i) {
@@ -169,54 +168,4 @@ public class C5Test {
             }
         }
     }
-
-
-    @Test
-    public void C5_7_4_誤差逆伝播法を使った学習() throws Exception {
-
-        MnistLoader train = new MnistLoader(MnistLoader.TrainImages, MnistLoader.TrainLabels);
-        INDArray x_train = train.normalizedImages();
-        INDArray t_train = train.oneHotLabels();
-        MnistLoader test = new MnistLoader(MnistLoader.TestImages, MnistLoader.TestLabels);
-        INDArray x_test = test.normalizedImages();
-        INDArray t_test = test.oneHotLabels();
-
-        List<Double> train_loss_list = new ArrayList<>();
-        List<Double> train_acc_list = new ArrayList<>();
-        List<Double> test_acc_list = new ArrayList<>();
-
-        int iters_num = 10000;
-        long train_size = x_train.size(0);
-        int batch_size = 100;
-        double learning_rate = 0.1;
-
-        OptimizedTwoLayerNet network = new OptimizedTwoLayerNet(784, 50, 10, 0.01D);
-
-        DataSet dataSet = new DataSet(x_train, t_train);
-        double iter_per_epoch = Math.max(train_size / batch_size, 1);
-        for (int i = 0; i < iters_num; ++i) {
-            DataSet sample = dataSet.sample(batch_size);
-            INDArray x_batch = sample.getFeatures();
-            INDArray t_batch = sample.getLabels();
-
-            TwolayerNetParameter grad = network.gradient(x_batch, t_batch);
-            network.parameter.weight1 = network.parameter.weight1.sub(grad.weight1.mul(learning_rate));
-            network.parameter.bias1 = network.parameter.bias1.sub(grad.bias1.mul(learning_rate));
-            network.parameter.weight2 = network.parameter.weight2.sub(grad.weight2.mul(learning_rate));
-            network.parameter.bias2 = network.parameter.bias2.sub(grad.bias2.mul(learning_rate));
-
-            double loss = network.loss(x_batch, t_batch);
-            train_loss_list.add(loss);
-            if (i % iter_per_epoch == 0) {
-                double train_acc = network.accuracy(x_train, t_train);
-                double test_acc = network.accuracy(x_test, t_test);
-                train_acc_list.add(train_acc);
-                test_acc_list.add(test_acc);
-                System.out.printf("loss=%f train_acc=%f test_acc=%f%n", loss, train_acc, test_acc);
-            }
-        }
-        assertTrue(train_acc_list.get(train_acc_list.size() - 1) > 0.8);
-        assertTrue(test_acc_list.get(test_acc_list.size() - 1) > 0.8);
-    }
-
 }
