@@ -6,6 +6,8 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.stage.Stage;
+import net.moli9ma.deeplearning.optimizer.AdaGradOptimizer;
+import net.moli9ma.deeplearning.optimizer.Optimizer;
 import net.moli9ma.deeplearning.optimizer.StochasticGradientDescentOptimizer;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -37,7 +39,8 @@ public class C6Test extends Application {
         HashMap<String, INDArray> params = new HashMap<>();
         params.put("w1", parameter);
 
-        StochasticGradientDescentOptimizer descent = new StochasticGradientDescentOptimizer(0.2);
+        //StochasticGradientDescentOptimizer descent = new StochasticGradientDescentOptimizer(0.2);
+        Optimizer descent = new AdaGradOptimizer(0.1);
 
         List<INDArray> results = new ArrayList<>();
 
