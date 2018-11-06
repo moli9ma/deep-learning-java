@@ -9,7 +9,6 @@ import javafx.stage.Stage;
 import net.moli9ma.deeplearning.NdUtil;
 import net.moli9ma.deeplearning.optimizer.AdaGradOptimizer;
 import net.moli9ma.deeplearning.optimizer.Optimizer;
-import net.moli9ma.deeplearning.optimizer.StochasticGradientDescentOptimizer;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
