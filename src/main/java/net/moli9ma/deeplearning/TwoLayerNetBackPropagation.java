@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 public class TwoLayerNetBackPropagation {
 
-    TwolayerNetParameter parameter;
+    public TwolayerNetParameter parameter;
     LinkedHashMap<String, Layer> layers;
     LastLayer lastLayer;
 

@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 public class TwoLayerNet {
 
-    TwolayerNetParameter parameter;
+    public TwolayerNetParameter parameter;
 
     public TwoLayerNet(INDArray weight1, INDArray bias1, INDArray weight2, INDArray bias2) {
         parameter = new TwolayerNetParameter(weight1, bias1, weight2, bias2);

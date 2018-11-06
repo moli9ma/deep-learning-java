@@ -1,4 +1,4 @@
-package net.moli9ma.deeplearning;
+package net.moli9ma.deeplearning.layer;
 
 import net.moli9ma.deeplearning.layer.ReLULayer;
 import org.junit.jupiter.api.Test;

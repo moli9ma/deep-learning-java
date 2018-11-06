@@ -1,5 +1,9 @@
-package net.moli9ma.deeplearning;
+package net.moli9ma.deeplearning.c5;
 
+import net.moli9ma.deeplearning.MnistLoader;
+import net.moli9ma.deeplearning.NdUtil;
+import net.moli9ma.deeplearning.TwoLayerNetBackPropagation;
+import net.moli9ma.deeplearning.TwolayerNetParameter;
 import net.moli9ma.deeplearning.layer.AddLayer;
 import net.moli9ma.deeplearning.layer.AddLayerData;
 import net.moli9ma.deeplearning.layer.MulLayer;

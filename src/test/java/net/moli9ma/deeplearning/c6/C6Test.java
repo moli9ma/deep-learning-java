@@ -1,4 +1,4 @@
-package net.moli9ma.deeplearning;
+package net.moli9ma.deeplearning.c6;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -6,6 +6,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.stage.Stage;
+import net.moli9ma.deeplearning.NdUtil;
 import net.moli9ma.deeplearning.optimizer.AdaGradOptimizer;
 import net.moli9ma.deeplearning.optimizer.Optimizer;
 import net.moli9ma.deeplearning.optimizer.StochasticGradientDescentOptimizer;

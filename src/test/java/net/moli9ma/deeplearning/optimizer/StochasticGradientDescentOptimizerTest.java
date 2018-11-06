@@ -1,5 +1,6 @@
-package net.moli9ma.deeplearning;
+package net.moli9ma.deeplearning.optimizer;
 
+import net.moli9ma.deeplearning.TwolayerNetParameter;
 import net.moli9ma.deeplearning.optimizer.StochasticGradientDescentOptimizer;
 import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
