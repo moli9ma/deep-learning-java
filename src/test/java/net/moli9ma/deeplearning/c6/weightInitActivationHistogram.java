@@ -10,6 +10,8 @@ import javafx.stage.Stage;
 import net.moli9ma.deeplearning.NdUtil;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.function.Function;
+import org.nd4j.linalg.function.Supplier;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -47,33 +49,41 @@ public class weightInitActivationHistogram extends Application {
         final int nodeNum = 100;
 
         // 隠れ層の数
-        final int hiddenLayerSize = 3;
+        final int hiddenLayerSize = 5;
+
+        // 重みの初期化関数（変化させて試して見よう！）
+        //Supplier<INDArray> weightInitializer = () -> Nd4j.randn(new int[]{nodeNum, nodeNum}).mul(1.0);
+        //Supplier<INDArray> weightInitializer = () -> Nd4j.randn(new int[]{nodeNum, nodeNum}).mul(0.01);
+        Supplier<INDArray> weightInitializer = () -> Nd4j.randn(new int[]{nodeNum, nodeNum}).mul(Math.sqrt(1.0 / nodeNum));
+
+        // アクティベーション関数 (変化させて試して見よう！)
+        //Function<INDArray, INDArray> activator = NdUtil::Sigmoid;
+        Function<INDArray, INDArray> activator = NdUtil::ReLU;
+        //Function<INDArray, INDArray> activator = NdUtil::Tahh;
 
         // アクティベーションの結果
         List<INDArray> activations = new ArrayList<>();
-
         for (int i = 0; i < hiddenLayerSize; i++) {
 
             if (i != 0) {
                 x = activations.get(i - 1);
             }
 
-            //INDArray w = Nd4j.randn(new int[]{nodeNum, nodeNum}).mul(0.01);
-            INDArray w = Nd4j.randn(new int[]{nodeNum, nodeNum}).mul(Math.sqrt(1.0 / nodeNum));
-
+            INDArray w = weightInitializer.get();
             INDArray a = x.mmul(w);
-
-            INDArray z = NdUtil.Sigmoid(a);
-
+            INDArray z = activator.apply(a);
             activations.add(z);
         }
+        drawData(primaryStage, activations);
+    }
 
+    public void drawData(Stage primaryStage, List<INDArray> activations) {
         // 系列を生成
         List<XYChart.Series<String, Number>> seriesList = new ArrayList<>();
 
         for (int i = 0; i < activations.size(); i++) {
 
-            final String seriesName = String.valueOf(i);
+            final String seriesName = String.valueOf(i) + "-layer";
             XYChart.Series<String, Number> series = new XYChart.Series<>();
             series.setName(seriesName);
 
@@ -107,8 +117,5 @@ public class weightInitActivationHistogram extends Application {
         primaryStage.setTitle("得点分布図");
         primaryStage.setScene(scene);
         primaryStage.show();
-        primaryStage.show();
     }
-
-
 }

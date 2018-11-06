@@ -25,6 +25,25 @@ public class NdUtil {
     }
 
     /**
+     * ReLU関数
+     *
+     * @param input
+     * @return
+     */
+    public static INDArray ReLU(INDArray input) {
+        return Transforms.relu(input);
+    }
+
+    /**
+     * Tahh関数
+     * @param input
+     * @return
+     */
+    public  static INDArray Tahh(INDArray input) {
+        return Transforms.tan(input);
+    }
+
+    /**
      * Softmax
      *
      * @param input
