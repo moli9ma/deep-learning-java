@@ -18,6 +18,13 @@ public class AdamOptimizer implements Optimizer
     private HashMap<String, INDArray> m;
     private HashMap<String, INDArray> v;
 
+    public AdamOptimizer() {
+        this.learningRate = 0.01;
+    }
+
+    public AdamOptimizer(double learningRate) {
+        this.learningRate = learningRate;
+    }
 
     @Override
     public void update(HashMap<String, INDArray> params, HashMap<String, INDArray> grads) {

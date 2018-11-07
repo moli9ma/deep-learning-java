@@ -5,7 +5,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.util.HashMap;
 
-public class StochasticGradientDescentOptimizer {
+public class StochasticGradientDescentOptimizer implements Optimizer {
 
     double learningRate;
 
