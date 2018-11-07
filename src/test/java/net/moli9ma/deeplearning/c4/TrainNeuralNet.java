@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class C4Test {
+public class TrainNeuralNet {
 
     @Test
     public void miniBatch() throws IOException {

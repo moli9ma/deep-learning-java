@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class weightInitActivationHistogram extends Application {
+public class WeightInitActivationHistogram extends Application {
 
     public static void main(String[] args) {
         launch(args);
