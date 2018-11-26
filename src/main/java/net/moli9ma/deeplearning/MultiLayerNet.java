@@ -5,10 +5,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.ops.transforms.Transforms;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 public class MultiLayerNet {
@@ -21,10 +18,23 @@ public class MultiLayerNet {
     double weightInitStd;
     double weightDecayLambda;
 
-    HashMap<String, Layer> layers;
-    HashMap<String, INDArray> params;
+    LinkedHashMap<String, Layer> layers;
+    public HashMap<String, INDArray> params;
 
     LastLayer lastLayer;
+
+
+    /**
+     *
+     *
+     * @param inputSize
+     * @param outputSize
+     * @param hiddenSizeList
+     * @param activationType
+     */
+    public MultiLayerNet(long inputSize, long outputSize, List<Long> hiddenSizeList, ActivationType activationType) {
+        this(inputSize, outputSize, hiddenSizeList, activationType, WeightInitializeType.ReLU, 0.01, 0);
+    }
 
     /**
      * Constructor
@@ -43,17 +53,20 @@ public class MultiLayerNet {
         this.hiddenSizeList = hiddenSizeList;
         this.activationType = activationType;
         this.weightInitStd = weightInitStd;
+        this.weightInitializeType = weightInitializeType;
         this.weightDecayLambda = weightDecayLambda;
 
+        this.params = new HashMap<>();
+        this.layers = new LinkedHashMap<>();
 
         this.initWeight(weightInitStd);
 
-        for (int i = 0; i < hiddenSizeList.size(); i++) {
+        for (int i = 1; i < hiddenSizeList.size() + 1; ++i) {
             this.layers.put("Affine" + i, new AffineLayer(this.params.get("W" + i), this.params.get("b" + i)));
             this.layers.put("Activation_function" + i, toActivationFunc(activationType));
         }
 
-        long index = hiddenSizeList.size();
+        long index = hiddenSizeList.size() + 1;
         this.layers.put("Affine" + index, new AffineLayer(this.params.get("W" + index), this.params.get("b" + index)));
         this.lastLayer = new SoftmaxWithLossLayer();
     }
@@ -69,19 +82,21 @@ public class MultiLayerNet {
         allSizeList.addAll(this.hiddenSizeList);
         allSizeList.add(this.outputSize);
 
-        for (int i = 0; i < allSizeList.size(); i++) {
+        for (int i = 1; i < allSizeList.size(); ++i) {
             double scale = weightInitStd;
             switch (weightInitializeType) {
                 case ReLU:
                 case He:
-                    scale = Math.sqrt(2.0 / allSizeList.get(i));
+                    scale = Math.sqrt(2.0 / allSizeList.get(i - 1));
+                    break;
                 case Sigmoid:
                 case Xavier:
-                    scale = Math.sqrt(1.0 / allSizeList.get(i));
+                    scale = Math.sqrt(1.0 / allSizeList.get(i - 1));
+                    break;
             }
 
-            this.params.put("W" + i, Nd4j.randn(allSizeList.get(i), allSizeList.get(i+1)).mul(scale));
-            this.params.put("b" + i, Nd4j.zeros(allSizeList.get(i+1)));
+            this.params.put("W" + i, Nd4j.randn(allSizeList.get(i - 1), allSizeList.get(i)).mul(scale));
+            this.params.put("b" + i, Nd4j.zeros(allSizeList.get(i)));
         }
     }
 
@@ -108,7 +123,7 @@ public class MultiLayerNet {
         INDArray y = this.predict(x);
 
         double weightDecay = 0;
-        for (int i = 0; i < this.hiddenSizeList.size() + 1; i++) {
+        for (int i = 1; i < this.hiddenSizeList.size() + 2; ++i) {
             INDArray w = this.params.get("W" + i);
             weightDecay += 0.5 * this.weightDecayLambda * Transforms.pow(w, 2).sumNumber().doubleValue();
         }
@@ -147,7 +162,7 @@ public class MultiLayerNet {
 
         Function<INDArray, Double> lossFunc = w -> this.loss(x, t);
         HashMap<String, INDArray> grads = new HashMap<>();
-        for (int i = 0; i < this.hiddenSizeList.size() + 1; i++) {
+        for (int i = 1; i < this.hiddenSizeList.size() + 2; ++i) {
             grads.put("W" + i, NdUtil.NumericalGradient(lossFunc, this.params.get("W" + i)));
             grads.put("b" + i, NdUtil.NumericalGradient(lossFunc, this.params.get("b" + i)));
         }
@@ -180,7 +195,7 @@ public class MultiLayerNet {
         }
 
         HashMap<String, INDArray> grads = new HashMap<>();
-        for (int i = 0; i < this.hiddenSizeList.size() + 1; i++) {
+        for (int i = 1; i < this.hiddenSizeList.size() + 2; ++i) {
             AffineLayer affineLayer = (AffineLayer)this.layers.get("Affine" + i);
             grads.put("W" + i, affineLayer.dWeight.add(this.weightDecayLambda).mul(affineLayer.weight));
             grads.put("b" + i, affineLayer.dBias);
