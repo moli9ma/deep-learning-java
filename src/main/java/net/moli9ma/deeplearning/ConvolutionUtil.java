@@ -1,9 +1,11 @@
 package net.moli9ma.deeplearning;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.cpu.nativecpu.NDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.INDArrayIndex;
 import org.nd4j.linalg.indexing.NDArrayIndex;
+import org.nd4j.linalg.ops.transforms.Transforms;
 
 import static org.nd4j.linalg.indexing.NDArrayIndex.all;
 import static org.nd4j.linalg.indexing.NDArrayIndex.point;
@@ -76,5 +78,39 @@ public class ConvolutionUtil {
         long rows = convolutionParameter.getOutputNum();
         long cols = convolutionParameter.getKernelWidth() * convolutionParameter.getKernelHeight();
         return result.reshape(rows, cols);
+    }
+
+    public static INDArray Col2Im(INDArray input, ConvolutionParameter convolutionParameter) {
+
+        // イテレータの初期化
+        int maxX = (int) input.shape()[0];
+        int maxY = (int) input.shape()[1];
+        int kernelWidth = 1;
+        int kernelHeight = convolutionParameter.getKernelWidth() * convolutionParameter.getKernelHeight();
+        WindowIterator iterator = new WindowIterator(maxX, maxY, kernelWidth, kernelHeight, 1, 1);
+
+        // 結果となる行列を初期化する
+        // img = np.zeros((N, C, H + 2*pad + stride - 1, W + 2*pad + stride - 1))
+        int imageW = 2 * convolutionParameter.getPaddingWidth() + convolutionParameter.getStrideY();
+        int imageH = 2 * convolutionParameter.getPaddingHeight() + convolutionParameter.getStrideX();
+        INDArray result = Nd4j.zeros(imageW, imageH);
+
+
+        // 入力(行列)からkernelで取得されたであろうデータを抜き出して、結果行列に加算する
+        for (Window window : iterator) {
+
+            INDArrayIndex[] indices = new INDArrayIndex[]{
+                    NDArrayIndex.interval(window.getStartY(), window.getEndY()),
+                    NDArrayIndex.interval(window.getStartX(), window.getEndX())
+            };
+
+            INDArray x = input.get(indices);
+
+            INDArray reshaped = x.reshape(convolutionParameter.getKernelWidth(), convolutionParameter.getKernelHeight());
+
+            x.put(indices, reshaped);
+        }
+
+        return result;
     }
 }
