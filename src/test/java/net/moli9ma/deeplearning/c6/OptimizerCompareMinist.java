@@ -9,9 +9,11 @@ import javafx.stage.Stage;
 import net.moli9ma.deeplearning.MnistLoader;
 import net.moli9ma.deeplearning.MultiLayerNet;
 import net.moli9ma.deeplearning.optimizer.*;
+import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,17 +21,26 @@ import java.util.Map;
 
 public class OptimizerCompareMinist extends Application {
 
+    @Test
+    void hoge () {
+        int x = (int) 10l;
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-
-        // 比較対象のOptimizerを初期化する
         HashMap<String, Optimizer> optimizers = new HashMap<>();
         optimizers.put("SGD", new StochasticGradientDescentOptimizer());
         optimizers.put("Momentum", new MomentumOptimizer());
         optimizers.put("AdaGrad", new AdaGradOptimizer());
-        optimizers.put("Adam", new AdamOptimizer());
+        //optimizers.put("Adam", new AdamOptimizer());
 
+        try {
+            HashMap<String, List<Double>> losses = new OptimizerCompareMinist().getData(optimizers);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    public HashMap<String, List<Double>> getData(HashMap<String, Optimizer> optimizers) throws IOException {
 
         // Mnist画像を読み込む
         MnistLoader train = new MnistLoader(MnistLoader.TrainImages, MnistLoader.TrainLabels);
@@ -65,11 +76,11 @@ public class OptimizerCompareMinist extends Application {
             INDArray t_batch = sample.getLabels();
 
             for (String key : optimizers.keySet()) {
-                 HashMap<String, INDArray> grads = networks.get(key).gradient(x_batch, t_batch);
-                 optimizers.get(key).update(networks.get(key).params, grads);
+                HashMap<String, INDArray> grads = networks.get(key).gradient(x_batch, t_batch);
+                optimizers.get(key).update(networks.get(key).params, grads);
 
-                 double loss = networks.get(key).loss(x_batch, t_batch);
-                 losses.get(key).add(loss);
+                double loss = networks.get(key).loss(x_batch, t_batch);
+                losses.get(key).add(loss);
             }
 
             if (i % 100 == 0) {
@@ -80,6 +91,21 @@ public class OptimizerCompareMinist extends Application {
                 }
             }
         }
+        return losses;
+    }
+
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+
+        // 比較対象のOptimizerを初期化する
+        HashMap<String, Optimizer> optimizers = new HashMap<>();
+        optimizers.put("SGD", new StochasticGradientDescentOptimizer());
+        optimizers.put("Momentum", new MomentumOptimizer());
+        optimizers.put("AdaGrad", new AdaGradOptimizer());
+        //optimizers.put("Adam", new AdamOptimizer());
+
+        HashMap<String, List<Double>> losses = getData(optimizers);
 
         // plot
         primaryStage.setTitle("optimizer compare native");
@@ -92,8 +118,8 @@ public class OptimizerCompareMinist extends Application {
             series.setName(entry.getKey());
 
             List<Double> xHistory = losses.get(entry.getKey());
-            for (int i = 1; i <= xHistory.size(); i++) {
-                series.getData().add(new XYChart.Data<>(xHistory.get(i), (double)i));
+            for (int i = 0; i < xHistory.size(); i++) {
+                series.getData().add(new XYChart.Data<>((double)i + 1, xHistory.get(i)));
             }
             lineChart.getData().add(series);
         }

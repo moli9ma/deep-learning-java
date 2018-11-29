@@ -85,12 +85,10 @@ public class MultiLayerNet {
         for (int i = 1; i < allSizeList.size(); ++i) {
             double scale = weightInitStd;
             switch (weightInitializeType) {
-                case ReLU:
-                case He:
+                case ReLU: case He:
                     scale = Math.sqrt(2.0 / allSizeList.get(i - 1));
                     break;
-                case Sigmoid:
-                case Xavier:
+                case Sigmoid: case Xavier:
                     scale = Math.sqrt(1.0 / allSizeList.get(i - 1));
                     break;
             }
@@ -197,7 +195,7 @@ public class MultiLayerNet {
         HashMap<String, INDArray> grads = new HashMap<>();
         for (int i = 1; i < this.hiddenSizeList.size() + 2; ++i) {
             AffineLayer affineLayer = (AffineLayer)this.layers.get("Affine" + i);
-            grads.put("W" + i, affineLayer.dWeight.add(this.weightDecayLambda).mul(affineLayer.weight));
+            grads.put("W" + i, affineLayer.dWeight.add(affineLayer.weight.mul(this.weightDecayLambda)));
             grads.put("b" + i, affineLayer.dBias);
         }
         return grads;
