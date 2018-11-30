@@ -140,7 +140,55 @@ public class ConvolutionUtilTest {
         }
 
 
+        {
+            int kH = 2;
+            int kW = 2;
+            int sX = 1;
+            int sY = 1;
+            int pX = 0;
+            int pY = 0;
 
+            // input
+            int height = 3;
+            int width = 3;
+
+            double[][] x1 = new double[][]{
+                    {1, 2, 3},
+                    {4, 5, 6},
+                    {7, 8, 9},
+            };
+
+            double[][] x2 = new double[][]{
+                    {1, 1, 1},
+                    {1, 1, 1},
+                    {1, 1, 1},
+            };
+
+            INDArray x = Nd4j.create(new double[][][][]{
+                    {
+                            x1, x2
+                    },
+                    {
+                            x1, x2
+                    }
+            });
+
+            INDArray input = Nd4j.create(new double[][]{
+                    {1, 2, 4, 5, 1, 1, 1, 1,},
+                    {2, 3, 5, 6, 1, 1, 1, 1,},
+                    {4, 5, 7, 8, 1, 1, 1, 1,},
+                    {5, 6, 8, 9, 1, 1, 1, 1,},
+                    {1, 2, 4, 5, 1, 1, 1, 1,},
+                    {2, 3, 5, 6, 1, 1, 1, 1,},
+                    {4, 5, 7, 8, 1, 1, 1, 1,},
+                    {5, 6, 8, 9, 1, 1, 1, 1,},
+            });
+
+            ConvolutionParameter parameter = new ConvolutionParameter(width, height, kH, kW, pY, pX, sX, sY);
+            INDArray result = ConvolutionUtil.Col2Im(2, 2, input, parameter);
+            System.out.print(result);
+            //assertEquals(result);
+        }
     }
 
 

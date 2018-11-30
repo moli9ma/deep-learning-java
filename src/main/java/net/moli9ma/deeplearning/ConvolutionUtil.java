@@ -80,6 +80,55 @@ public class ConvolutionUtil {
         return result.reshape(rows, cols);
     }
 
+    /**
+     * ４次元のカラム展開したデータに対してイメージ復元したデータを返却します。
+     *
+     * @param batchNumber
+     * @param channelNumber
+     * @param input
+     * @param parameter
+     * @return
+     */
+    public static INDArray Col2Im(final int batchNumber, final int channelNumber, INDArray input, ConvolutionParameter parameter) {
+
+        int maxX = (int) input.shape()[0];
+        int maxY = (int) input.shape()[1];
+        int kernelWidth = maxX / channelNumber;
+        int kernelHeight = maxY / batchNumber;
+        int strideX = kernelWidth;
+        int strideY = kernelHeight;
+
+        WindowIterator iterator = new WindowIterator(maxX, maxY, kernelWidth, kernelHeight, strideX, strideY);
+
+
+/*
+        for (int i = 0; i < batchNumber; i++) {
+            for (int j = 0; j < channelNumber; j++) {
+            }
+        }
+*/
+
+        for (Window window : iterator) {
+            INDArrayIndex[] indices = new INDArrayIndex[]{
+                    NDArrayIndex.interval(window.getStartY(), window.getEndY()),
+                    NDArrayIndex.interval(window.getStartX(), window.getEndX())
+            };
+
+            INDArray hoge = input.get(indices);
+            INDArray x = Col2Im(hoge, parameter);
+            System.out.println(x);
+        }
+        return Nd4j.zeros(1, 1);
+    }
+
+
+    /**
+     * 2次元のカラム展開したデータに対して、復元したデータを返却します。
+     *
+     * @param input
+     * @param convolutionParameter
+     * @return
+     */
     public static INDArray Col2Im(INDArray input, ConvolutionParameter convolutionParameter) {
 
         // colイテレータの初期化
@@ -94,10 +143,12 @@ public class ConvolutionUtil {
         int imageW = convolutionParameter.getInputWidth() + 2 * convolutionParameter.getPaddingWidth() + convolutionParameter.getStrideY() - 1;
         int imageH = convolutionParameter.getInputHeight() + 2 * convolutionParameter.getPaddingHeight() + convolutionParameter.getStrideX() - 1;
 
+/*
         System.out.println(imageH);
         System.out.println(imageW);
         System.out.println(convolutionParameter.getInputHeight());
         System.out.println(convolutionParameter.getInputWidth());
+*/
         INDArray result = Nd4j.zeros(imageW, imageH);
 
         WindowIterator imIterator = new WindowIterator(
@@ -129,8 +180,10 @@ public class ConvolutionUtil {
                     NDArrayIndex.interval(imWindow.getStartX(), imWindow.getEndX())
             }, filteredData);
 
+/*
             System.out.println(filteredData);
             System.out.println(emp);
+*/
             result.addi(emp);
         }
         return result;
