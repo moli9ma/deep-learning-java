@@ -82,35 +82,57 @@ public class ConvolutionUtil {
 
     public static INDArray Col2Im(INDArray input, ConvolutionParameter convolutionParameter) {
 
-        // イテレータの初期化
+        // colイテレータの初期化
         int maxX = (int) input.shape()[0];
         int maxY = (int) input.shape()[1];
         int kernelWidth = 1;
         int kernelHeight = convolutionParameter.getKernelWidth() * convolutionParameter.getKernelHeight();
-        WindowIterator iterator = new WindowIterator(maxX, maxY, kernelWidth, kernelHeight, 1, 1);
+        WindowIterator colIterator = new WindowIterator(maxX, maxY, kernelWidth, kernelHeight, 1, 1);
 
-        // 結果となる行列を初期化する
+        // 結果となる行列(im)を及びイテレータを初期化する
         // img = np.zeros((N, C, H + 2*pad + stride - 1, W + 2*pad + stride - 1))
-        int imageW = 2 * convolutionParameter.getPaddingWidth() + convolutionParameter.getStrideY();
-        int imageH = 2 * convolutionParameter.getPaddingHeight() + convolutionParameter.getStrideX();
+        int imageW = convolutionParameter.getInputWidth() + 2 * convolutionParameter.getPaddingWidth() + convolutionParameter.getStrideY() - 1;
+        int imageH = convolutionParameter.getInputHeight() + 2 * convolutionParameter.getPaddingHeight() + convolutionParameter.getStrideX() - 1;
+
+        System.out.println(imageH);
+        System.out.println(imageW);
+        System.out.println(convolutionParameter.getInputHeight());
+        System.out.println(convolutionParameter.getInputWidth());
         INDArray result = Nd4j.zeros(imageW, imageH);
+
+        WindowIterator imIterator = new WindowIterator(
+                (int) result.shape()[0],
+                (int) result.shape()[1],
+                convolutionParameter.getKernelWidth(),
+                convolutionParameter.getKernelHeight(),
+                convolutionParameter.getStrideX(),
+                convolutionParameter.getStrideY()
+                );
 
 
         // 入力(行列)からkernelで取得されたであろうデータを抜き出して、結果行列に加算する
-        for (Window window : iterator) {
+        for (Window colWindow : colIterator) {
 
             INDArrayIndex[] indices = new INDArrayIndex[]{
-                    NDArrayIndex.interval(window.getStartY(), window.getEndY()),
-                    NDArrayIndex.interval(window.getStartX(), window.getEndX())
+                    NDArrayIndex.interval(colWindow.getStartY(), colWindow.getEndY()),
+                    NDArrayIndex.interval(colWindow.getStartX(), colWindow.getEndX())
             };
 
-            INDArray x = input.get(indices);
+            INDArray filteredData = input.get(indices).reshape(
+                    convolutionParameter.getKernelWidth(),
+                    convolutionParameter.getKernelHeight());
 
-            INDArray reshaped = x.reshape(convolutionParameter.getKernelWidth(), convolutionParameter.getKernelHeight());
+            Window imWindow = imIterator.next();
+            INDArray emp = Nd4j.zeros(imageW, imageH);
+            emp.put(new INDArrayIndex[]{
+                    NDArrayIndex.interval(imWindow.getStartY(), imWindow.getEndY()),
+                    NDArrayIndex.interval(imWindow.getStartX(), imWindow.getEndX())
+            }, filteredData);
 
-            x.put(indices, reshaped);
+            System.out.println(filteredData);
+            System.out.println(emp);
+            result.addi(emp);
         }
-
         return result;
     }
 }

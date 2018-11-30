@@ -106,6 +106,45 @@ public class ConvolutionUtilTest {
     }
 
     @Test
+    void col2im() {
+
+        {
+            int kH = 2;
+            int kW = 2;
+            int sX = 1;
+            int sY = 1;
+            int pX = 0;
+            int pY = 0;
+
+            // input
+            int height = 3;
+            int width = 3;
+            INDArray input = Nd4j.create(new double[][]{
+                    {1, 2, 3},
+                    {4, 5, 6},
+                    {7, 8, 9},
+            });
+
+            ConvolutionParameter parameter = new ConvolutionParameter(width, height, kH, kW, pY, pX, sX, sY);
+            INDArray arr = ConvolutionUtil.Im2col(input, parameter);
+
+
+            System.out.println("im2col:");
+            System.out.println(arr);
+
+            INDArray result = ConvolutionUtil.Col2Im(arr, parameter);
+            System.out.print(result);
+
+            //assertEquals(result);
+
+        }
+
+
+
+    }
+
+
+    @Test
     void convolution2D() {
 
         {
