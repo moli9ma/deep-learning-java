@@ -46,6 +46,13 @@ public class ConvolutionUtil {
         return result;
     }
 
+    /**
+     * 2次元のデータに対してカラム展開を行います。
+     *
+     * @param input
+     * @param convolutionParameter
+     * @return
+     */
     public static INDArray Im2col(INDArray input, ConvolutionParameter convolutionParameter) {
 
         // Padding
@@ -81,6 +88,30 @@ public class ConvolutionUtil {
     }
 
     /**
+     * 4次元のデータに対してカラム展開を行います。
+     *
+     * @param input
+     * @param convolutionParameter
+     * @return
+     */
+    public static INDArray Im2col4D(INDArray input, ConvolutionParameter convolutionParameter) {
+        int batchNumber = (int) input.shape()[0];
+        int channelNumber = (int) input.shape()[1];
+
+        INDArray batchMerged = null;
+        for (int i = 0; i < batchNumber; i++) {
+            INDArray channelMerged = null;
+            for (int j = 0; j < channelNumber; j++) {
+                INDArray arr = Im2col(input.get(new INDArrayIndex[]{point(i), point(j)}), convolutionParameter);
+                channelMerged = (channelMerged == null) ?  arr :  Nd4j.concat(1, channelMerged, arr);
+            }
+            batchMerged = (batchMerged == null) ?  channelMerged :  Nd4j.concat(0, batchMerged, channelMerged);
+        }
+        return batchMerged;
+    }
+
+
+    /**
      * ４次元のカラム展開したデータに対してイメージ復元したデータを返却します。
      *
      * @param batchNumber
@@ -100,14 +131,7 @@ public class ConvolutionUtil {
 
         WindowIterator iterator = new WindowIterator(maxX, maxY, kernelWidth, kernelHeight, strideX, strideY);
 
-
-/*
-        for (int i = 0; i < batchNumber; i++) {
-            for (int j = 0; j < channelNumber; j++) {
-            }
-        }
-*/
-
+        INDArray result = null;
         for (Window window : iterator) {
             INDArrayIndex[] indices = new INDArrayIndex[]{
                     NDArrayIndex.interval(window.getStartY(), window.getEndY()),
@@ -116,9 +140,10 @@ public class ConvolutionUtil {
 
             INDArray hoge = input.get(indices);
             INDArray x = Col2Im(hoge, parameter);
-            System.out.println(x);
+
+            result = (result == null) ? x : Nd4j.concat(0, result, x);
         }
-        return Nd4j.zeros(1, 1);
+        return result.reshape(batchNumber, channelNumber, parameter.getInputWidth(), parameter.getInputHeight());
     }
 
 

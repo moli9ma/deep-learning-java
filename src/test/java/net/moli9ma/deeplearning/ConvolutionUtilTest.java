@@ -106,6 +106,54 @@ public class ConvolutionUtilTest {
     }
 
     @Test
+    void im2col4d() {
+
+        {
+            int kH = 2;
+            int kW = 2;
+            int sX = 1;
+            int sY = 1;
+            int pX = 0;
+            int pY = 0;
+
+            // input
+            int height = 3;
+            int width = 3;
+            double[][] imageX = new double[][]{
+                    {1, 2, 3},
+                    {4, 5, 6},
+                    {7, 8, 9},
+            };
+
+            double[][] imageY = new double[][]{
+                    {1, 1, 1},
+                    {1, 1, 1},
+                    {1, 1, 1},
+            };
+
+            INDArray input = Nd4j.create(new double[][][][]{
+                    {imageX, imageY},
+                    {imageX, imageY},
+            });
+
+            ConvolutionParameter parameter = new ConvolutionParameter(width, height, kH, kW, pY, pX, sX, sY);
+            INDArray arr = ConvolutionUtil.Im2col4D(input, parameter);
+
+            System.out.println(arr);
+
+            INDArray expected = Nd4j.create(new double[][]{
+                    {1, 2, 4, 5},
+                    {2, 3, 5, 6},
+                    {4, 5, 7, 8},
+                    {5, 6, 8, 9}
+            });
+            assertEquals(expected, arr);
+        }
+
+
+    }
+
+    @Test
     void col2im() {
 
         {
@@ -140,6 +188,11 @@ public class ConvolutionUtilTest {
         }
 
 
+    }
+
+    @Test
+    void col2Im4D() {
+
         {
             int kH = 2;
             int kW = 2;
@@ -173,6 +226,10 @@ public class ConvolutionUtilTest {
                     }
             });
 
+            ConvolutionParameter parameter = new ConvolutionParameter(width, height, kH, kW, pY, pX, sX, sY);
+
+            /*
+            // Im2col4Dを実行した結果は以下のようになる
             INDArray input = Nd4j.create(new double[][]{
                     {1, 2, 4, 5, 1, 1, 1, 1,},
                     {2, 3, 5, 6, 1, 1, 1, 1,},
@@ -182,15 +239,31 @@ public class ConvolutionUtilTest {
                     {2, 3, 5, 6, 1, 1, 1, 1,},
                     {4, 5, 7, 8, 1, 1, 1, 1,},
                     {5, 6, 8, 9, 1, 1, 1, 1,},
+            });*/
+
+            INDArray input = ConvolutionUtil.Im2col4D(x, parameter);
+            INDArray result = ConvolutionUtil.Col2Im(2, 2, input, parameter);
+
+            double[][] expectedX1 = new double[][]{
+                    {1.0000, 4.0000, 3.0000},
+                    {8.0000, 20.0000, 12.0000},
+                    {7.0000, 16.0000, 9.0000}
+            };
+
+            double[][] expectedX2 = new double[][]{
+                    {1.0000, 2.0000, 1.0000},
+                    {2.0000, 4.0000, 2.0000},
+                    {1.0000, 2.0000, 1.0000}
+            };
+
+            INDArray expected = Nd4j.create(new double[][][][]{
+                    {expectedX1, expectedX2},
+                    {expectedX1, expectedX2},
             });
 
-            ConvolutionParameter parameter = new ConvolutionParameter(width, height, kH, kW, pY, pX, sX, sY);
-            INDArray result = ConvolutionUtil.Col2Im(2, 2, input, parameter);
-            System.out.print(result);
-            //assertEquals(result);
+            assertEquals(expected, result);
         }
     }
-
 
     @Test
     void convolution2D() {
