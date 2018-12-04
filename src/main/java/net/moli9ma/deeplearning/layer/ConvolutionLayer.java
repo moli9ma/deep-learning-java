@@ -3,6 +3,7 @@ package net.moli9ma.deeplearning.layer;
 import net.moli9ma.deeplearning.ConvolutionParameter;
 import net.moli9ma.deeplearning.ConvolutionUtil;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 public class ConvolutionLayer implements Layer {
 
@@ -16,19 +17,60 @@ public class ConvolutionLayer implements Layer {
     public INDArray dBias;
 
     // 中間データ （backward時に使用）
-    INDArray x;
+    INDArray input;
+    INDArray colInput;
+    INDArray colWeight;
+
+    /**
+     *
+     * Constructor
+     * @param convolutionParameter
+     * @param weight
+     * @param bias
+     */
+    public ConvolutionLayer(ConvolutionParameter convolutionParameter, INDArray weight, INDArray bias) {
+        this.convolutionParameter = convolutionParameter;
+        this.weight = weight;
+        this.bias = bias;
+    }
 
     @Override
     public INDArray forward(INDArray x) {
+        INDArray colInput = ConvolutionUtil.Im2col4D(x, this.convolutionParameter);
+        INDArray colWeight = ConvolutionUtil.kernel2col4D(this.weight, this.convolutionParameter);
 
-        this.x = x;
+        this.input = x;
+        this.colInput = colInput;
+        this.colWeight = colWeight;
+
         int miniBatch = (int) x.shape()[0];
         int depth = (int) x.shape()[1];
         return ConvolutionUtil.Convolution4D(x, weight, miniBatch, depth, convolutionParameter);
     }
 
     @Override
-    public INDArray backward(INDArray x) {
+    public INDArray backward(INDArray dout) {
+        int miniBatch = (int) this.input.shape()[0];
+        int depth = (int) this.input.shape()[1];
+
+        System.out.println("dout");
+        System.out.println(dout);
+
+        this.dBias = Nd4j.sum(dout);
+        dout = dout.reshape(convolutionParameter.getOutputNum(), miniBatch);
+        System.out.println("dout");
+        System.out.println(dout);
+
+        this.dWeight = this.colInput.mmul(dout);
+        System.out.println(this.dBias);
+        System.out.println(this.dWeight);
+
+
+        INDArray dcol = dout.mmul(this.colWeight);
+        System.out.println(dcol);
+
+        INDArray dx = ConvolutionUtil.Col2Im(miniBatch, depth, dcol, convolutionParameter);
+        System.out.println(dx);
         return null;
     }
 }

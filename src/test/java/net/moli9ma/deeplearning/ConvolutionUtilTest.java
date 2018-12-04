@@ -149,9 +149,63 @@ public class ConvolutionUtilTest {
             });
             assertEquals(expected, arr);
         }
-
-
     }
+
+    @Test
+    void kernel2col4D() {
+
+
+        {
+
+            int miniBatch = 2;
+            int depth = 2;
+
+            int kH = 2;
+            int kW = 2;
+            int sX = 1;
+            int sY = 1;
+            int pX = 0;
+            int pY = 0;
+
+            int height = 3;
+            int width = 3;
+
+            // kernel
+            // kernel patternA
+            INDArray kernelA = Nd4j.create(new double[][]{
+                    {1, 1},
+                    {1, 1},
+            });
+
+            INDArray kernelB = Nd4j.create(new double[][]{
+                    {2, 2},
+                    {2, 2},
+            });
+
+            INDArray kernel = Nd4j.create(new int[]{miniBatch, depth, kH, kW}, 'c');
+            kernel.put(new INDArrayIndex[]{point(0), point(0), all(), all()}, kernelA);
+            kernel.put(new INDArrayIndex[]{point(0), point(1), all(), all()}, kernelB);
+            kernel.put(new INDArrayIndex[]{point(1), point(0), all(), all()}, kernelA);
+            kernel.put(new INDArrayIndex[]{point(1), point(1), all(), all()}, kernelB);
+
+            ConvolutionParameter parameter = new ConvolutionParameter(width, height, kH, kW, pY, pX, sX, sY);
+            INDArray colKernel = ConvolutionUtil.kernel2col4D(kernel, parameter);
+            INDArray expected = Nd4j.create(new double[][]{
+
+                    {    1.0000,    1.0000},
+                    {    1.0000,    1.0000},
+                    {    1.0000,    1.0000},
+                    {    1.0000,    1.0000},
+                    {    2.0000,    2.0000},
+                    {    2.0000,    2.0000},
+                    {    2.0000,    2.0000},
+                    {    2.0000,    2.0000}
+            });
+
+            assertEquals(expected, colKernel);
+        }
+    }
+
 
     @Test
     void col2im() {

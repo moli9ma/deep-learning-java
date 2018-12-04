@@ -110,6 +110,27 @@ public class ConvolutionUtil {
         return batchMerged;
     }
 
+    /**
+     * kernelをcol展開します。
+     * @param kernel
+     * @return
+     */
+    public static INDArray kernel2col4D(INDArray kernel, ConvolutionParameter parameter) {
+        int batchNumber = (int) kernel.shape()[0];
+        int channelNumber = (int) kernel.shape()[1];
+        int colNumber = parameter.getKernelHeight() * parameter.getKernelWidth();
+
+        INDArray batchMerged = null;
+        for (int i = 0; i < batchNumber; i++) {
+            INDArray channelMerged = null;
+            for (int j = 0; j < channelNumber; j++) {
+                INDArray arr = kernel.get(new INDArrayIndex[]{point(i), point(j)}).reshape(1, colNumber);
+                channelMerged = (channelMerged == null) ? arr : Nd4j.concat(1, channelMerged, arr);
+            }
+            batchMerged = (batchMerged == null) ?  channelMerged :  Nd4j.concat(0, batchMerged, channelMerged);
+        }
+        return batchMerged;
+    }
 
     /**
      * ４次元のカラム展開したデータに対してイメージ復元したデータを返却します。
