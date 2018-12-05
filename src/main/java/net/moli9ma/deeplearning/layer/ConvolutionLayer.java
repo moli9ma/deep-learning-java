@@ -92,7 +92,6 @@ public class ConvolutionLayer implements Layer {
 
         this.dBias = Nd4j.sum(dout);
 
-
         INDArray batchMerged = null;
         for (int i = 0; i < miniBatch; i++) {
             INDArray channelMerged = null;
@@ -117,7 +116,12 @@ public class ConvolutionLayer implements Layer {
         System.out.println(this.dBias);
         System.out.println(this.dWeight);
 
-        INDArray dcol = dout.mmul(this.colWeight.reshape(this.colWeight.shape()[1], this.colWeight.shape()[0]));
+        System.out.println("colWeight");
+        System.out.println(this.colWeight);
+
+
+        INDArray dcol = dout.mmul(this.colWeight.transpose());
+        //INDArray dcol = dout.mmul(this.colWeight.reshape(this.colWeight.shape()[1], this.colWeight.shape()[0]));
         System.out.println(dcol);
 
         INDArray dx = ConvolutionUtil.Col2Im(miniBatch, depth, dcol, convolutionParameter);
@@ -183,4 +187,16 @@ public class ConvolutionLayer implements Layer {
         dx = col2im(dcol, self.x.shape, FH, FW, self.stride, self.pad)
 
         return dx
+*/
+
+
+/*
+        [[  148.   296.   444.   592.   148.   296.   444.   592.]
+        [  188.   376.   564.   752.   188.   376.   564.   752.]
+        [  268.   536.   804.  1072.   268.   536.   804.  1072.]
+        [  308.   616.   924.  1232.   308.   616.   924.  1232.]
+        [  148.   296.   444.   592.   148.   296.   444.   592.]
+        [  188.   376.   564.   752.   188.   376.   564.   752.]
+        [  268.   536.   804.  1072.   268.   536.   804.  1072.]
+        [  308.   616.   924.  1232.   308.   616.   924.  1232.]]
 */

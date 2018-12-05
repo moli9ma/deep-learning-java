@@ -86,13 +86,13 @@ public class ConvolutionLayerTest {
             // kernel
             // kernel patternA
             INDArray kernelA = Nd4j.create(new double[][]{
-                    {1, 1},
-                    {1, 1},
+                    {1, 2},
+                    {3, 4},
             });
 
             INDArray kernelB = Nd4j.create(new double[][]{
-                    {1, 1},
-                    {1, 1},
+                    {1, 2},
+                    {3, 4},
             });
 
             INDArray kernel = Nd4j.create(new int[]{miniBatch, depth, kH, kW}, 'c');
