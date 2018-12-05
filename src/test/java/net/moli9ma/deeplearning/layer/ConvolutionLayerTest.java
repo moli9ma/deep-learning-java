@@ -14,11 +14,12 @@ import static org.nd4j.linalg.indexing.NDArrayIndex.point;
 public class ConvolutionLayerTest {
 
     @Test
-    void test() {
+    void test1() {
 
 
         // miniBatch = 1, depth = 1
         {
+            System.out.println("miniBatch = 1, depth = 1");
             int miniBatch = 1;
             int depth = 1;
             int height = 3;
@@ -58,15 +59,16 @@ public class ConvolutionLayerTest {
             ConvolutionLayer convolutionLayer = new ConvolutionLayer(parameter, kernel, bias);
 
             INDArray out = convolutionLayer.forward(input);
-            System.out.println(out);
-
             INDArray dx = convolutionLayer.backward(out);
             System.out.println(dx);
         }
+    }
 
+    @Test
+    void test2() {
 
-        // miniBatch = 2, depth = 2
         {
+            System.out.println("miniBatch = 2, depth = 2");
             int miniBatch = 2;
             int depth = 2;
             int height = 3;
@@ -89,8 +91,8 @@ public class ConvolutionLayerTest {
             });
 
             INDArray kernelB = Nd4j.create(new double[][]{
-                    {2, 2},
-                    {2, 2},
+                    {1, 1},
+                    {1, 1},
             });
 
             INDArray kernel = Nd4j.create(new int[]{miniBatch, depth, kH, kW}, 'c');
@@ -115,7 +117,8 @@ public class ConvolutionLayerTest {
             ConvolutionLayer convolutionLayer = new ConvolutionLayer(parameter, kernel, bias);
 
             INDArray out = convolutionLayer.forward(input);
-            System.out.println(out);
+            INDArray dx = convolutionLayer.backward(out);
+            System.out.println(dx);
         }
     }
 }

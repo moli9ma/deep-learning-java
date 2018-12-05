@@ -124,10 +124,10 @@ public class ConvolutionUtil {
         for (int i = 0; i < batchNumber; i++) {
             INDArray channelMerged = null;
             for (int j = 0; j < channelNumber; j++) {
-                INDArray arr = kernel.get(new INDArrayIndex[]{point(i), point(j)}).reshape(1, colNumber);
-                channelMerged = (channelMerged == null) ? arr : Nd4j.concat(1, channelMerged, arr);
+                INDArray arr = kernel.get(new INDArrayIndex[]{point(i), point(j)}).reshape(colNumber, 1);
+                channelMerged = (channelMerged == null) ? arr : Nd4j.concat(0, channelMerged, arr);
             }
-            batchMerged = (batchMerged == null) ?  channelMerged :  Nd4j.concat(0, batchMerged, channelMerged);
+            batchMerged = (batchMerged == null) ?  channelMerged :  Nd4j.concat(1, batchMerged, channelMerged);
         }
         return batchMerged;
     }

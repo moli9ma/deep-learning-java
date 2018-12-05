@@ -2,13 +2,21 @@ package net.moli9ma.deeplearning.layer;
 
 import net.moli9ma.deeplearning.ConvolutionParameter;
 import net.moli9ma.deeplearning.ConvolutionUtil;
+import net.moli9ma.deeplearning.Window;
+import net.moli9ma.deeplearning.WindowIterator;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.INDArrayIndex;
+import org.nd4j.linalg.indexing.NDArrayIndex;
+
+import static org.nd4j.linalg.indexing.NDArrayIndex.all;
+import static org.nd4j.linalg.indexing.NDArrayIndex.point;
 
 public class ConvolutionLayer implements Layer {
 
     ConvolutionParameter convolutionParameter;
 
+    // 重み・バイアスパラメータ
     public INDArray weight;
     public INDArray bias;
 
@@ -43,9 +51,35 @@ public class ConvolutionLayer implements Layer {
         this.colInput = colInput;
         this.colWeight = colWeight;
 
+        INDArray convolved = colInput.mmul(colWeight);
+        System.out.println("convolved");
+        System.out.println(convolved);
+        System.out.println(convolved.shapeInfoToString());
+
         int miniBatch = (int) x.shape()[0];
         int depth = (int) x.shape()[1];
-        return ConvolutionUtil.Convolution4D(x, weight, miniBatch, depth, convolutionParameter);
+        INDArray out = Nd4j.create(new int[]{miniBatch, depth, convolutionParameter.getOutputWidth(), convolutionParameter.getOutputHeight()}, 'c');
+
+        int maxX = (int) convolved.shape()[1];
+        int maxY = (int) convolved.shape()[0];
+        int kernelWidth = 1;
+        int kernelHeight = convolutionParameter.getKernelWidth() * convolutionParameter.getKernelHeight();
+        WindowIterator colIterator = new WindowIterator(maxX, maxY, kernelWidth, kernelHeight, 1, kernelHeight);
+
+        for (int i = 0; i < miniBatch; i++) {
+            for (int j = 0; j < depth; j++) {
+                Window window = colIterator.next();
+                INDArrayIndex[] indices = new INDArrayIndex[]{
+                        NDArrayIndex.interval(window.getStartY(), window.getEndY()),
+                        NDArrayIndex.interval(window.getStartX(), window.getEndX())
+                };
+
+                INDArray out2D = convolved.get(indices).reshape(convolutionParameter.getOutputWidth(), convolutionParameter.getOutputHeight());
+                out.put(new INDArrayIndex[]{point(i), point(j), all(), all()}, out2D);
+            }
+        }
+
+        return out;
     }
 
     @Override
@@ -57,16 +91,33 @@ public class ConvolutionLayer implements Layer {
         System.out.println(dout);
 
         this.dBias = Nd4j.sum(dout);
-        dout = dout.reshape(convolutionParameter.getOutputNum(), miniBatch);
+
+
+        INDArray batchMerged = null;
+        for (int i = 0; i < miniBatch; i++) {
+            INDArray channelMerged = null;
+            for (int j = 0; j < depth; j++) {
+                int rows = convolutionParameter.getKernelWidth() * convolutionParameter.getKernelHeight();
+                int columns = 1;
+                INDArray arr = dout.get(new INDArrayIndex[]{point(i), point(j)}).reshape(rows, columns);
+                channelMerged = (channelMerged == null) ?  arr :  Nd4j.concat(1, channelMerged, arr);
+            }
+            batchMerged = (batchMerged == null) ?  channelMerged :  Nd4j.concat(0, batchMerged, channelMerged);
+        }
+
+        // dout = dout.reshape(convolutionParameter.getOutputNum(), miniBatch);
+        dout = batchMerged;
         System.out.println("dout");
         System.out.println(dout);
+
+        System.out.println("colInput");
+        System.out.println(colInput);
 
         this.dWeight = this.colInput.mmul(dout);
         System.out.println(this.dBias);
         System.out.println(this.dWeight);
 
-
-        INDArray dcol = dout.mmul(this.colWeight);
+        INDArray dcol = dout.mmul(this.colWeight.reshape(this.colWeight.shape()[1], this.colWeight.shape()[0]));
         System.out.println(dcol);
 
         INDArray dx = ConvolutionUtil.Col2Im(miniBatch, depth, dcol, convolutionParameter);
