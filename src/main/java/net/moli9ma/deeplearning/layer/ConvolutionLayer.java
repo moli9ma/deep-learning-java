@@ -1,13 +1,9 @@
 package net.moli9ma.deeplearning.layer;
 
-import net.moli9ma.deeplearning.ConvolutionParameter;
-import net.moli9ma.deeplearning.ConvolutionUtil;
-import net.moli9ma.deeplearning.Window;
-import net.moli9ma.deeplearning.WindowIterator;
+import net.moli9ma.deeplearning.*;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.INDArrayIndex;
-import org.nd4j.linalg.indexing.NDArrayIndex;
 
 import static org.nd4j.linalg.indexing.NDArrayIndex.all;
 import static org.nd4j.linalg.indexing.NDArrayIndex.point;
@@ -46,39 +42,26 @@ public class ConvolutionLayer implements Layer {
     public INDArray forward(INDArray x) {
         INDArray colInput = ConvolutionUtil.Im2col4D(x, this.convolutionParameter);
         INDArray colWeight = ConvolutionUtil.kernel2col4D(this.weight, this.convolutionParameter);
-
         this.input = x;
         this.colInput = colInput;
         this.colWeight = colWeight;
-
         INDArray convolved = colInput.mmul(colWeight);
-        System.out.println("convolved");
-        System.out.println(convolved);
-        System.out.println(convolved.shapeInfoToString());
-
         int miniBatch = (int) x.shape()[0];
         int depth = (int) x.shape()[1];
+        return reshape2Image(miniBatch, depth, convolved);
+    }
+
+
+    private INDArray reshape2Image(int miniBatch, int depth, INDArray convolved4D) {
         INDArray out = Nd4j.create(new int[]{miniBatch, depth, convolutionParameter.getOutputWidth(), convolutionParameter.getOutputHeight()}, 'c');
-
-        int maxX = (int) convolved.shape()[1];
-        int maxY = (int) convolved.shape()[0];
-        int kernelWidth = 1;
-        int kernelHeight = convolutionParameter.getKernelWidth() * convolutionParameter.getKernelHeight();
-        WindowIterator colIterator = new WindowIterator(maxX, maxY, kernelWidth, kernelHeight, 1, kernelHeight);
-
+        ColumnIterator columnIterator = new ColumnIterator(convolved4D, convolutionParameter.getKernelWidth(), convolutionParameter.getKernelHeight());
         for (int i = 0; i < miniBatch; i++) {
             for (int j = 0; j < depth; j++) {
-                Window window = colIterator.next();
-                INDArrayIndex[] indices = new INDArrayIndex[]{
-                        NDArrayIndex.interval(window.getStartY(), window.getEndY()),
-                        NDArrayIndex.interval(window.getStartX(), window.getEndX())
-                };
-
-                INDArray out2D = convolved.get(indices).reshape(convolutionParameter.getOutputWidth(), convolutionParameter.getOutputHeight());
-                out.put(new INDArrayIndex[]{point(i), point(j), all(), all()}, out2D);
+                INDArray col2D = columnIterator.next();
+                INDArray image2D = col2D.reshape(convolutionParameter.getOutputWidth(), convolutionParameter.getOutputHeight());
+                out.put(new INDArrayIndex[]{point(i), point(j), all(), all()}, image2D);
             }
         }
-
         return out;
     }
 
@@ -86,26 +69,9 @@ public class ConvolutionLayer implements Layer {
     public INDArray backward(INDArray dout) {
         int miniBatch = (int) this.input.shape()[0];
         int depth = (int) this.input.shape()[1];
-
-        System.out.println("dout");
-        System.out.println(dout);
-
         this.dBias = Nd4j.sum(dout);
 
-        INDArray batchMerged = null;
-        for (int i = 0; i < miniBatch; i++) {
-            INDArray channelMerged = null;
-            for (int j = 0; j < depth; j++) {
-                int rows = convolutionParameter.getKernelWidth() * convolutionParameter.getKernelHeight();
-                int columns = 1;
-                INDArray arr = dout.get(new INDArrayIndex[]{point(i), point(j)}).reshape(rows, columns);
-                channelMerged = (channelMerged == null) ?  arr :  Nd4j.concat(1, channelMerged, arr);
-            }
-            batchMerged = (batchMerged == null) ?  channelMerged :  Nd4j.concat(0, batchMerged, channelMerged);
-        }
-
-        // dout = dout.reshape(convolutionParameter.getOutputNum(), miniBatch);
-        dout = batchMerged;
+        dout = reshape2Col(miniBatch, depth, dout);
         System.out.println("dout");
         System.out.println(dout);
 
@@ -121,12 +87,26 @@ public class ConvolutionLayer implements Layer {
 
 
         INDArray dcol = dout.mmul(this.colWeight.transpose());
-        //INDArray dcol = dout.mmul(this.colWeight.reshape(this.colWeight.shape()[1], this.colWeight.shape()[0]));
         System.out.println(dcol);
 
         INDArray dx = ConvolutionUtil.Col2Im(miniBatch, depth, dcol, convolutionParameter);
         System.out.println(dx);
         return null;
+    }
+
+    private INDArray reshape2Col(int miniBatch, int depth, INDArray image4D) {
+        INDArray batchMerged = null;
+        for (int i = 0; i < miniBatch; i++) {
+            INDArray channelMerged = null;
+            for (int j = 0; j < depth; j++) {
+                int rows = convolutionParameter.getKernelWidth() * convolutionParameter.getKernelHeight();
+                int columns = 1;
+                INDArray arr = image4D.get(new INDArrayIndex[]{point(i), point(j)}).reshape(rows, columns);
+                channelMerged = (channelMerged == null) ?  arr :  Nd4j.concat(1, channelMerged, arr);
+            }
+            batchMerged = (batchMerged == null) ?  channelMerged :  Nd4j.concat(0, batchMerged, channelMerged);
+        }
+        return batchMerged;
     }
 }
 

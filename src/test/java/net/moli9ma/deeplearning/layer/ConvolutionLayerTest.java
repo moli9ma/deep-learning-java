@@ -107,11 +107,35 @@ public class ConvolutionLayerTest {
                     {7, 8, 9},
             });
 
+            INDArray dataA = Nd4j.create(new double[][]{
+                    {1, 1, 1},
+                    {1, 1, 1},
+                    {1, 1, 1},
+            });
+
+            INDArray dataB = Nd4j.create(new double[][]{
+                    {2, 2, 2},
+                    {2, 2, 2},
+                    {2, 2, 2},
+            });
+
+            INDArray dataC = Nd4j.create(new double[][]{
+                    {3, 3, 3},
+                    {3, 3, 3},
+                    {3, 3, 3},
+            });
+
+            INDArray dataD = Nd4j.create(new double[][]{
+                    {4, 4, 4},
+                    {4, 4, 4},
+                    {4, 4, 4},
+            });
+
             INDArray input = Nd4j.create(new int[]{miniBatch, depth, height, width}, 'c');
-            input.put(new INDArrayIndex[]{point(0), point(0), all(), all()}, data);
-            input.put(new INDArrayIndex[]{point(0), point(1), all(), all()}, data);
-            input.put(new INDArrayIndex[]{point(1), point(0), all(), all()}, data);
-            input.put(new INDArrayIndex[]{point(1), point(1), all(), all()}, data);
+            input.put(new INDArrayIndex[]{point(0), point(0), all(), all()}, dataA);
+            input.put(new INDArrayIndex[]{point(0), point(1), all(), all()}, dataB);
+            input.put(new INDArrayIndex[]{point(1), point(0), all(), all()}, dataC);
+            input.put(new INDArrayIndex[]{point(1), point(1), all(), all()}, dataD);
 
             INDArray bias = Nd4j.zeros(1);
             ConvolutionLayer convolutionLayer = new ConvolutionLayer(parameter, kernel, bias);
