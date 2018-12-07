@@ -14,7 +14,7 @@ public class ConvolutionParameter {
     private int strideY;
 
 
-    public ConvolutionParameter(int inputWidth, int inputHeight, int kernelWidth, int kernelHeight, int paddingWidth, int paddingHeight, int strideX, int strideY) {
+    public  ConvolutionParameter(int inputWidth, int inputHeight, int kernelWidth, int kernelHeight, int paddingWidth, int paddingHeight, int strideX, int strideY) {
         this.inputWidth = inputWidth;
         this.inputHeight = inputHeight;
         this.kernelWidth = kernelWidth;
