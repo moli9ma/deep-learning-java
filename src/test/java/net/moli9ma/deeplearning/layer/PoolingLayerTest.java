@@ -52,4 +52,54 @@ public class PoolingLayerTest {
 
         // backward
     }
+
+    @Test
+    void test2() {
+
+/*
+        x_a = np.array([
+    [4, 1, 3],
+    [3, 2, 1],
+    [7, 4, 9],
+])
+
+        x_b = np.array([
+    [4, 5, 3],
+    [3, 2, 6],
+    [7, 4, 9],
+])
+*/
+
+        int poolWidth = 2;
+        int poolHeight = 2;
+        PoolingLayer poolingLayer = new PoolingLayer(poolWidth, poolHeight);
+
+        // forward
+        INDArray dataA = Nd4j.create(new double[][]{
+                {4, 1, 3},
+                {3, 2, 1},
+                {7, 4, 9},
+        });
+
+        INDArray dataB = Nd4j.create(new double[][]{
+                {4, 5, 3},
+                {3, 2, 6},
+                {7, 4, 9},
+        });
+
+        INDArray input = Nd4j.create(new int[]{2, 2, 3, 3}, 'c');
+        input.put(new INDArrayIndex[]{point(0), point(0), all(), all()}, dataA);
+        input.put(new INDArrayIndex[]{point(0), point(1), all(), all()}, dataB);
+        input.put(new INDArrayIndex[]{point(1), point(0), all(), all()}, dataA);
+        input.put(new INDArrayIndex[]{point(1), point(1), all(), all()}, dataB);
+        INDArray out = poolingLayer.forward(input);
+        System.out.println("out:");
+        System.out.println(out);
+        System.out.println(out.get(new INDArrayIndex[]{point(0), point(0), point(0), point(0)}));
+        System.out.println("out_shape:");
+        System.out.println(out.shapeInfoToString());
+
+        INDArray dout = poolingLayer.backward(out);
+        System.out.println(dout);
+    }
 }

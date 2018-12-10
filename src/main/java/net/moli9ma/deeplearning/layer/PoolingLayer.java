@@ -1,11 +1,10 @@
 package net.moli9ma.deeplearning.layer;
 
-import net.moli9ma.deeplearning.ColumnIterator;
-import net.moli9ma.deeplearning.ConvolutionParameter;
-import net.moli9ma.deeplearning.ConvolutionUtil;
+import net.moli9ma.deeplearning.*;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.INDArrayIndex;
+import org.nd4j.linalg.indexing.NDArrayIndex;
 
 import static org.nd4j.linalg.indexing.NDArrayIndex.point;
 
@@ -17,7 +16,10 @@ public class PoolingLayer implements Layer {
     private final int padding;
 
     // 中間データ(逆伝搬で使います)
-    private INDArray x;
+    private int batchNumber;
+    private int channelNumber;
+    private int height;
+    private int width;
     private INDArray argMax;
 
     public PoolingLayer(int poolWidth, int poolHeight) {
@@ -37,17 +39,25 @@ public class PoolingLayer implements Layer {
         int channelNumber =  (int) x.shape()[1];
         int height = (int) x.shape()[2];
         int width = (int) x.shape()[3];
+        this.batchNumber = batchNumber;
+        this.channelNumber = channelNumber;
+        this.height = height;
+        this.width = width;
+
         int outHeight = 1 +(height - this.poolHeight) / this.stride;
         int outWidth = 1 +(width - this.poolWidth) / this.stride;
         ConvolutionParameter parameter = new ConvolutionParameter(width, height, this.poolWidth, this.poolHeight, padding, padding, stride, stride);
 
         // Max Pooling
         INDArray out = Nd4j.create(new int[]{batchNumber, channelNumber, outHeight, outWidth});
+        argMax = Nd4j.create(new int[]{batchNumber, channelNumber, outHeight, outWidth});
         for (int i = 0; i < batchNumber; i++) {
             for (int j = 0; j < channelNumber; j++) {
                 INDArray arr = ConvolutionUtil.Im2col(x.get(new INDArrayIndex[]{point(i), point(j)}), parameter);
-                INDArray reshaped = arr.max(0).reshape(outWidth, outHeight);
+                INDArray reshaped = arr.max(0).reshape(outHeight, outWidth);
                 out.put(new INDArrayIndex[]{point(i), point(j)}, reshaped);
+                INDArray argmax = arr.argMax(0).reshape(outHeight, outWidth);
+                argMax.put(new INDArrayIndex[]{point(i), point(j)}, argmax);
             }
         }
         INDArray col = out;
@@ -56,7 +66,43 @@ public class PoolingLayer implements Layer {
 
     @Override
     public INDArray backward(INDArray x) {
-        return null;
+        INDArray out = Nd4j.zeros(new int[]{batchNumber, channelNumber, this.height, this.width});
+        for (int i = 0; i < batchNumber; i++) {
+            for (int j = 0; j < channelNumber; j++) {
+
+                int maxX = this.width;
+                int maxY = this.height;
+                int kernelWidth= this.poolWidth;
+                int kernelHeight = this.poolHeight;
+                WindowIterator iterator = new WindowIterator(
+                        maxX,
+                        maxY,
+                        kernelWidth,
+                        kernelHeight,
+                        this.stride,
+                        this.stride
+                );
+
+                for (int k = 0; k < poolHeight; k++) {
+                    for (int l = 0; l < poolWidth; l++) {
+                        INDArray pool = Nd4j.zeros(new int[]{this.poolHeight * this.poolWidth});
+                        double value = x.getDouble(i, j, k, l);
+                        long index = this.argMax.getInt(i, j, k, l);
+                        pool.put(new INDArrayIndex[]{point(index)}, value);
+
+                        Window empWindow = iterator.next();
+                        INDArrayIndex[] indices = new INDArrayIndex[]{
+                                NDArrayIndex.interval(empWindow.getStartY(), empWindow.getEndY()),
+                                NDArrayIndex.interval(empWindow.getStartX(), empWindow.getEndX())
+                        };
+                        INDArray emp = Nd4j.create(new int[]{this.height, this.width});
+                        emp.put(indices, pool.reshape(this.poolHeight, this.poolWidth));
+                        out.get(new INDArrayIndex[]{point(i), point(j)}).addi(emp);
+                    }
+                }
+            }
+        }
+        return out;
     }
 }
 
