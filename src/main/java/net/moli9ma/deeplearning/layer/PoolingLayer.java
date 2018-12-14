@@ -5,6 +5,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.INDArrayIndex;
 import org.nd4j.linalg.indexing.NDArrayIndex;
+import org.nd4j.linalg.ops.transforms.Transforms;
 
 import static org.nd4j.linalg.indexing.NDArrayIndex.point;
 
@@ -47,25 +48,34 @@ public class PoolingLayer implements Layer {
         int outHeight = 1 +(height - this.poolHeight) / this.stride;
         int outWidth = 1 +(width - this.poolWidth) / this.stride;
         ConvolutionParameter parameter = new ConvolutionParameter(width, height, this.poolWidth, this.poolHeight, padding, padding, stride, stride);
+        INDArray col = ConvolutionUtil.Im2col4D(x, parameter);
+        System.out.println("col.shape");
+        System.out.println(col.shapeInfoToString());
 
-        // Max Pooling
-        INDArray out = Nd4j.create(new int[]{batchNumber, channelNumber, outHeight, outWidth});
-        argMax = Nd4j.create(new int[]{batchNumber, channelNumber, outHeight, outWidth});
-        for (int i = 0; i < batchNumber; i++) {
-            for (int j = 0; j < channelNumber; j++) {
-                INDArray arr = ConvolutionUtil.Im2col(x.get(new INDArrayIndex[]{point(i), point(j)}), parameter);
-                INDArray reshaped = arr.max(0).reshape(outHeight, outWidth);
-                out.put(new INDArrayIndex[]{point(i), point(j)}, reshaped);
-                INDArray argmax = arr.argMax(0).reshape(outHeight, outWidth);
-                argMax.put(new INDArrayIndex[]{point(i), point(j)}, argmax);
-            }
-        }
-        INDArray col = out;
-        return col;
+        col = col.reshape(new int[]{-1, this.poolHeight * this.poolWidth});
+
+        INDArray out = col.max(1);
+        out = out.reshape(batchNumber, outHeight, outWidth, channelNumber);
+        out = out.permute(0, 3, 1, 2);
+        this.argMax = col.argMax(1);
+        return out;
     }
 
     @Override
     public INDArray backward(INDArray x) {
+        System.out.println("x : ");
+        System.out.println(x);
+        x = x.permute(0, 2, 3, 1);
+        System.out.println("x : ");
+        System.out.println(x);
+
+        System.out.println("x flat: ");
+
+        System.out.println("arg max: ");
+        System.out.println(this.argMax);
+
+
+
         INDArray out = Nd4j.zeros(new int[]{batchNumber, channelNumber, this.height, this.width});
         for (int i = 0; i < batchNumber; i++) {
             for (int j = 0; j < channelNumber; j++) {

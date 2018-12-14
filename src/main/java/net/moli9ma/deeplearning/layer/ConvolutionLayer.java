@@ -4,6 +4,7 @@ import net.moli9ma.deeplearning.*;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.INDArrayIndex;
+import org.nd4j.linalg.ops.transforms.Transforms;
 
 import static org.nd4j.linalg.indexing.NDArrayIndex.all;
 import static org.nd4j.linalg.indexing.NDArrayIndex.point;
@@ -46,22 +47,9 @@ public class ConvolutionLayer implements Layer {
         this.colInput = colInput;
         this.colWeight = colWeight;
         INDArray convolved = colInput.mmul(colWeight);
-        int miniBatch = (int) x.shape()[0];
-        int depth = (int) x.shape()[1];
-        return reshape2Image(miniBatch, depth, convolved);
-    }
-
-
-    private INDArray reshape2Image(int miniBatch, int depth, INDArray convolved4D) {
-        INDArray out = Nd4j.create(new int[]{miniBatch, depth, convolutionParameter.getOutputWidth(), convolutionParameter.getOutputHeight()}, 'c');
-        ColumnIterator columnIterator = new ColumnIterator(convolved4D, convolutionParameter.getKernelWidth(), convolutionParameter.getKernelHeight());
-        for (int i = 0; i < miniBatch; i++) {
-            for (int j = 0; j < depth; j++) {
-                INDArray col2D = columnIterator.next();
-                INDArray image2D = col2D.reshape(convolutionParameter.getOutputWidth(), convolutionParameter.getOutputHeight());
-                out.put(new INDArrayIndex[]{point(i), point(j), all(), all()}, image2D);
-            }
-        }
+        int batchNumber = (int) x.shape()[0];
+        INDArray reshaped = convolved.reshape(new int[]{batchNumber, convolutionParameter.getOutputHeight(), convolutionParameter.getOutputHeight(), -1});
+        INDArray out = reshaped.permute(0, 3, 1, 2);
         return out;
     }
 

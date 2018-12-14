@@ -48,8 +48,8 @@ public class PoolingLayerTest {
         input.put(new INDArrayIndex[]{point(0), point(1), all(), all()}, dataB);
         input.put(new INDArrayIndex[]{point(1), point(0), all(), all()}, dataC);
         input.put(new INDArrayIndex[]{point(1), point(1), all(), all()}, dataD);
-        poolingLayer.forward(input);
-
+        INDArray out =        poolingLayer.forward(input);
+        System.out.println(out);
         // backward
     }
 
