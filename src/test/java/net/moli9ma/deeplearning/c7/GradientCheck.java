@@ -4,8 +4,11 @@ import net.moli9ma.deeplearning.SimpleConvolutionNet;
 import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.INDArrayIndex;
 
 import java.util.HashMap;
+
+import static org.nd4j.linalg.indexing.NDArrayIndex.point;
 
 public class GradientCheck {
 
@@ -40,8 +43,9 @@ public class GradientCheck {
         INDArray x = Nd4j.randn(new int[]{1, 1, 10, 10});
         System.out.println(x.shapeInfoToString());
 
-        // 教師データ
-        INDArray t = Nd4j.create(new double[]{1}).reshape(1, 1);
+        // 教師データ (one-hot)
+        INDArray t = Nd4j.zeros(1, 10);
+        t.put(new INDArrayIndex[]{point(0), point(0)}, 1);
         System.out.println(t.shapeInfoToString());
 
         //HashMap<String, INDArray> grandNum = network.numericalGradient(x, t);

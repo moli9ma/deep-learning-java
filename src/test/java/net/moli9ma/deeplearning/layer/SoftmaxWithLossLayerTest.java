@@ -45,4 +45,25 @@ public class SoftmaxWithLossLayerTest {
             //System.out.print(b);
         }
     }
+
+    @Test
+    void t2() {
+        {
+            INDArray x = Nd4j.create(new double[][]{{0.01, 4.2, 0.1}});
+            System.out.println(x);
+            System.out.println(x.shapeInfoToString());
+
+            INDArray t = Nd4j.create(new double[][]{{0, 1, 0}});
+            System.out.println(t);
+            System.out.println(t.shapeInfoToString());
+
+            SoftmaxWithLossLayer layer = new SoftmaxWithLossLayer();
+            double f = layer.forward(x, t);
+            System.out.println(layer.y);
+            System.out.println(f);
+
+            INDArray b = layer.backward();
+            System.out.println(b);
+        }
+    }
 }

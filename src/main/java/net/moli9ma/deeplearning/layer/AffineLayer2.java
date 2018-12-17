@@ -29,8 +29,8 @@ public class AffineLayer2 implements Layer {
 
     @Override
     public INDArray backward(INDArray dout) {
-        INDArray dx = dout.mmul(this.weight);
-        this.dWeight = this.x.mmul(dout);
+        INDArray dx = dout.mmul(this.weight.transpose());
+        this.dWeight = this.x.transpose().mmul(dout);
         this.dBias = dout.sum(0);
 
         dx = dx.reshape(this.originalXShape);

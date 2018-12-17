@@ -67,15 +67,28 @@ public class PoolingLayer implements Layer {
         System.out.println(x);
         x = x.permute(0, 2, 3, 1);
         System.out.println("x : ");
-        System.out.println(x);
+        System.out.println(x.shapeInfoToString());
 
         System.out.println("x flat: ");
 
+        INDArray flatten = x.reshape(this.argMax.size(0) , 1);
+
         System.out.println("arg max: ");
-        System.out.println(this.argMax);
+        //System.out.println(this.argMax);
+        System.out.println(this.argMax.shapeInfoToString());
 
+        int poolSize = this.poolWidth * this.poolHeight;
+        INDArray dmax = Nd4j.zeros(this.argMax.size(0), poolSize);
+        for (int i = 0; i < this.argMax.size(0); i++) {
+            long idx = (long) this.argMax.getDouble(i);
+            dmax.put(new INDArrayIndex[]{point(i), point(idx)}, flatten.getDouble(i));
+        }
 
+        System.out.println("dmax: ");
+        System.out.println(dmax.shapeInfoToString());
+        System.out.println(dmax);
 
+        // col2Image
         INDArray out = Nd4j.zeros(new int[]{batchNumber, channelNumber, this.height, this.width});
         for (int i = 0; i < batchNumber; i++) {
             for (int j = 0; j < channelNumber; j++) {
