@@ -141,7 +141,11 @@ public class ConvolutionLayerTest {
             ConvolutionLayer convolutionLayer = new ConvolutionLayer(parameter, kernel, bias);
 
             INDArray out = convolutionLayer.forward(input);
+            System.out.println("out");
+            System.out.println(out);
+
             INDArray dx = convolutionLayer.backward(out);
+            System.out.println("dx");
             System.out.println(dx);
         }
     }

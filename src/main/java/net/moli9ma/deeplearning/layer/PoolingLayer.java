@@ -36,8 +36,8 @@ public class PoolingLayer implements Layer {
 
     @Override
     public INDArray forward(INDArray x) {
-        int batchNumber =  (int) x.shape()[0];
-        int channelNumber =  (int) x.shape()[1];
+        int batchNumber = (int) x.shape()[0];
+        int channelNumber = (int) x.shape()[1];
         int height = (int) x.shape()[2];
         int width = (int) x.shape()[3];
         this.batchNumber = batchNumber;
@@ -45,8 +45,8 @@ public class PoolingLayer implements Layer {
         this.height = height;
         this.width = width;
 
-        int outHeight = 1 +(height - this.poolHeight) / this.stride;
-        int outWidth = 1 +(width - this.poolWidth) / this.stride;
+        int outHeight = 1 + (height - this.poolHeight) / this.stride;
+        int outWidth = 1 + (width - this.poolWidth) / this.stride;
         ConvolutionParameter parameter = new ConvolutionParameter(width, height, this.poolWidth, this.poolHeight, padding, padding, stride, stride);
         INDArray col = ConvolutionUtil.Im2col4D(x, parameter);
         System.out.println("col.shape");
@@ -71,7 +71,7 @@ public class PoolingLayer implements Layer {
 
         System.out.println("x flat: ");
 
-        INDArray flatten = x.reshape(this.argMax.size(0) , 1);
+        INDArray flatten = x.reshape(this.argMax.size(0), 1);
 
         System.out.println("arg max: ");
         //System.out.println(this.argMax);
@@ -90,14 +90,17 @@ public class PoolingLayer implements Layer {
 
         // col2Image
         INDArray out = Nd4j.zeros(new int[]{batchNumber, channelNumber, this.height, this.width});
+
         for (int i = 0; i < batchNumber; i++) {
             for (int j = 0; j < channelNumber; j++) {
 
+                int z = 0;
+                INDArray image = Nd4j.create(new int[]{this.height, this.width});
                 int maxX = this.width;
                 int maxY = this.height;
-                int kernelWidth= this.poolWidth;
+                int kernelWidth = this.poolWidth;
                 int kernelHeight = this.poolHeight;
-                WindowIterator iterator = new WindowIterator(
+                WindowIterator imageIterator = new WindowIterator(
                         maxX,
                         maxY,
                         kernelWidth,
@@ -106,25 +109,22 @@ public class PoolingLayer implements Layer {
                         this.stride
                 );
 
-                for (int k = 0; k < poolHeight; k++) {
-                    for (int l = 0; l < poolWidth; l++) {
-                        INDArray pool = Nd4j.zeros(new int[]{this.poolHeight * this.poolWidth});
-                        double value = x.getDouble(i, j, k, l);
-                        long index = this.argMax.getInt(i, j, k, l);
-                        pool.put(new INDArrayIndex[]{point(index)}, value);
-
-                        Window empWindow = iterator.next();
-                        INDArrayIndex[] indices = new INDArrayIndex[]{
-                                NDArrayIndex.interval(empWindow.getStartY(), empWindow.getEndY()),
-                                NDArrayIndex.interval(empWindow.getStartX(), empWindow.getEndX())
-                        };
-                        INDArray emp = Nd4j.create(new int[]{this.height, this.width});
-                        emp.put(indices, pool.reshape(this.poolHeight, this.poolWidth));
-                        out.get(new INDArrayIndex[]{point(i), point(j)}).addi(emp);
-                    }
+                for (Window imageWindow : imageIterator) {
+                    INDArrayIndex[] indices = new INDArrayIndex[]{
+                            NDArrayIndex.interval(imageWindow.getStartY(), imageWindow.getEndY()),
+                            NDArrayIndex.interval(imageWindow.getStartX(), imageWindow.getEndX())
+                    };
+                    INDArray pooledArray = dmax.get(new INDArrayIndex[]{point(z)});
+                    image.get(indices).addi(pooledArray.reshape(this.poolHeight, this.poolWidth));
+                    z++;
                 }
+                out.put(new INDArrayIndex[]{point(i), point(j)}, image);
             }
         }
+
+        System.out.println("out");
+        System.out.println(out.shapeInfoToString());
+
         return out;
     }
 }

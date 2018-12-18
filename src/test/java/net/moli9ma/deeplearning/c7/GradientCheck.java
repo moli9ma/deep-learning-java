@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.INDArrayIndex;
+import org.nd4j.linalg.ops.transforms.Transforms;
 
 import java.util.HashMap;
 
@@ -50,12 +51,25 @@ public class GradientCheck {
 
         //HashMap<String, INDArray> grandNum = network.numericalGradient(x, t);
         HashMap<String, INDArray> grand = network.gradient(x, t);
+        //HashMap<String, INDArray> grandNum = network.numericalGradient(x, t);
+
+        System.out.println("b1");
+        System.out.println(grand.get("b1"));
+
+        System.out.println("b2");
+        System.out.println(grand.get("b2"));
+
+        System.out.println("b3");
+        System.out.println(grand.get("b3"));
+
 
         for (String key : grand.keySet()) {
-
             System.out.println("key : " + key);
-          //  System.out.println("grandNum : " + grandNum.get(key));
-            System.out.println("grand : " + grand.get(key));
+            //INDArray result = Transforms.abs(grandNum.get(key).sub(grand.get(key)));
+            //System.out.println("grandNum : " + result.mean());
+
+            //System.out.println("grand : " + grand.get(key));
+            System.out.println("grand shape: " + grand.get(key).shapeInfoToString());
         }
     }
 }

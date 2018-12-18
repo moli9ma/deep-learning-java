@@ -27,8 +27,8 @@ public class ConvolutionLayer implements Layer {
     INDArray colWeight;
 
     /**
-     *
      * Constructor
+     *
      * @param convolutionParameter
      * @param weight
      * @param bias
@@ -46,7 +46,7 @@ public class ConvolutionLayer implements Layer {
         this.input = x;
         this.colInput = colInput;
         this.colWeight = colWeight;
-        INDArray convolved = colInput.mmul(colWeight);
+        INDArray convolved = colInput.mmul(colWeight).addRowVector(this.bias);
         int batchNumber = (int) x.shape()[0];
         INDArray reshaped = convolved.reshape(new int[]{batchNumber, convolutionParameter.getOutputHeight(), convolutionParameter.getOutputHeight(), -1});
         INDArray out = reshaped.permute(0, 3, 1, 2);
@@ -55,33 +55,43 @@ public class ConvolutionLayer implements Layer {
 
     @Override
     public INDArray backward(INDArray dout) {
-        int miniBatch = (int) this.input.shape()[0];
-        int depth = (int) this.input.shape()[1];
-        this.dBias = Nd4j.sum(dout);
 
-        dout = reshape2Col(miniBatch, depth, dout);
+        int batchNumber = (int) this.weight.shape()[0];
+        int channelNumber = (int) this.weight.shape()[1];
+        int height = (int) this.weight.shape()[2];
+        int width = (int) this.weight.shape()[3];
+
+        dout = dout.permute(0, 2, 3, 1).reshape(-1, batchNumber);
         System.out.println("dout");
-        System.out.println(dout);
+        System.out.println(dout.shapeInfoToString());
+
+        this.dBias = Nd4j.sum(dout, 0);
+        System.out.println("dBias");
+        System.out.println(this.dBias);
+        System.out.println(this.dBias.shapeInfoToString());
 
         System.out.println("colInput");
         System.out.println(colInput);
 
-        this.dWeight = this.colInput.mmul(dout);
-        System.out.println(this.dBias);
-        System.out.println(this.dWeight);
+        this.dWeight = this.colInput.transpose().mmul(dout);
+        this.dWeight = this.dWeight.permute(0, 1).reshape(batchNumber, channelNumber, height, width);
 
+        System.out.println(this.dWeight);
         System.out.println("colWeight");
         System.out.println(this.colWeight);
 
-
         INDArray dcol = dout.mmul(this.colWeight.transpose());
-        System.out.println(dcol);
 
-        INDArray dx = ConvolutionUtil.Col2Im(miniBatch, depth, dcol, convolutionParameter);
+        System.out.println("dcol");
+        System.out.println(dcol.shapeInfoToString());
+
+        INDArray dx = ConvolutionUtil.Col2Im((int) this.input.shape()[0], (int) this.input.shape()[1], dcol, convolutionParameter);
+        System.out.println("dx");
         System.out.println(dx);
-        return null;
+        return dx;
     }
 
+/*
     private INDArray reshape2Col(int miniBatch, int depth, INDArray image4D) {
         INDArray batchMerged = null;
         for (int i = 0; i < miniBatch; i++) {
@@ -96,6 +106,7 @@ public class ConvolutionLayer implements Layer {
         }
         return batchMerged;
     }
+*/
 }
 
 

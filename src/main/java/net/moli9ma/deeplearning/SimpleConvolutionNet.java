@@ -10,10 +10,6 @@ import java.util.function.Function;
 /**
  * 単純な畳み込みネットワーク
  * conv - relu - pool - affine - relu - affine - softmax
- *
- *
- *
- *
  */
 public class SimpleConvolutionNet implements Network {
 
@@ -44,8 +40,8 @@ public class SimpleConvolutionNet implements Network {
 
     /**
      * 重みの標準偏差を指定（e.g. 0.01）
-     *             'relu'または'he'を指定した場合は「Heの初期値」を設定
-     *             'sigmoid'または'xavier'を指定した場合は「Xavierの初期値」を設定
+     * 'relu'または'he'を指定した場合は「Heの初期値」を設定
+     * 'sigmoid'または'xavier'を指定した場合は「Xavierの初期値」を設定
      */
     private final WeightInitializeType weightInitializeType;
 
@@ -74,7 +70,7 @@ public class SimpleConvolutionNet implements Network {
      */
     private final ConvolutionParameter convolutionParameter;
 
-    public SimpleConvolutionNet(int inputWidth, int inputHeight, int hiddenSize, int outputSize, ActivationType activationType, WeightInitializeType weightInitializeType, int kernelNum,  int kernelSize, int paddingSize, int stride) {
+    public SimpleConvolutionNet(int inputWidth, int inputHeight, int hiddenSize, int outputSize, ActivationType activationType, WeightInitializeType weightInitializeType, int kernelNum, int kernelSize, int paddingSize, int stride) {
         this.inputWidth = inputWidth;
         this.inputHeight = inputHeight;
         this.hiddenSize = hiddenSize;
@@ -103,7 +99,7 @@ public class SimpleConvolutionNet implements Network {
         this.params.put("W1", Nd4j.randn(new int[]{this.kernelNum, 1, this.kernelSize, this.kernelSize}).mul(weightInitStd));
         this.params.put("b1", Nd4j.zeros(this.kernelNum));
 
-        int poolOutputSize = this.kernelNum * (this.convolutionParameter.getOutputWidth()/2) * (this.convolutionParameter.getOutputHeight()/2);
+        int poolOutputSize = this.kernelNum * (this.convolutionParameter.getOutputWidth() / 2) * (this.convolutionParameter.getOutputHeight() / 2);
         this.params.put("W2", Nd4j.randn(poolOutputSize, this.hiddenSize).mul(weightInitStd));
         this.params.put("b2", Nd4j.zeros(this.hiddenSize));
 
@@ -143,7 +139,6 @@ public class SimpleConvolutionNet implements Network {
             x = layers.get(key).forward(x);
         }
         return x;
-
     }
 
     @Override
@@ -177,7 +172,7 @@ public class SimpleConvolutionNet implements Network {
 
         Function<INDArray, Double> lossFunc = w -> this.loss(x, t);
         HashMap<String, INDArray> grads = new HashMap<>();
-        for (int i = 1; i <= 3 ; i++) {
+        for (int i = 1; i <= 3; i++) {
             grads.put("W" + i, NdUtil.NumericalGradient(lossFunc, this.params.get("W" + i)));
             grads.put("b" + i, NdUtil.NumericalGradient(lossFunc, this.params.get("b" + i)));
         }
@@ -206,11 +201,11 @@ public class SimpleConvolutionNet implements Network {
         grads.put("W1", convolutionLayer1.dWeight);
         grads.put("b1", convolutionLayer1.dBias);
 
-        AffineLayer affineLayer1 = (AffineLayer) this.layers.get("Affine1");
+        AffineLayer2 affineLayer1 = (AffineLayer2) this.layers.get("Affine1");
         grads.put("W2", affineLayer1.dWeight);
         grads.put("b2", affineLayer1.dBias);
 
-        AffineLayer affineLayer2 = (AffineLayer) this.layers.get("Affine2");
+        AffineLayer2 affineLayer2 = (AffineLayer2) this.layers.get("Affine2");
         grads.put("W3", affineLayer2.dWeight);
         grads.put("b3", affineLayer2.dBias);
 
