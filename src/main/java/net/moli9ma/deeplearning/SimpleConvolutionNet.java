@@ -188,7 +188,6 @@ public class SimpleConvolutionNet implements Network {
         // backward for lastLayer
         INDArray b = this.lastLayer.backward();
 
-
         // backward for layers
         List<String> reverseOrderedKeys = new ArrayList<>(this.layers.keySet());
         Collections.reverse(reverseOrderedKeys);
@@ -210,5 +209,10 @@ public class SimpleConvolutionNet implements Network {
         grads.put("b3", affineLayer2.dBias);
 
         return grads;
+    }
+
+    @Override
+    public HashMap<String, INDArray> getParams() {
+        return this.params;
     }
 }

@@ -16,7 +16,6 @@ public interface Network {
 
     HashMap<String, INDArray> gradient(INDArray x, INDArray t);
 
+    HashMap<String, INDArray> getParams();
+
 }
-
-
-

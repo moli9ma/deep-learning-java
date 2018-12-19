@@ -41,12 +41,16 @@ public class GradientCheck {
                 );
 
         // 入力データ
-        INDArray x = Nd4j.randn(new int[]{1, 1, 10, 10});
+        INDArray x = Nd4j.randn(new int[]{5, 1, 10, 10});
         System.out.println(x.shapeInfoToString());
 
         // 教師データ (one-hot)
-        INDArray t = Nd4j.zeros(1, 10);
+        INDArray t = Nd4j.zeros(5, 10);
         t.put(new INDArrayIndex[]{point(0), point(0)}, 1);
+        t.put(new INDArrayIndex[]{point(1), point(0)}, 1);
+        t.put(new INDArrayIndex[]{point(2), point(0)}, 1);
+        t.put(new INDArrayIndex[]{point(3), point(0)}, 1);
+        t.put(new INDArrayIndex[]{point(4), point(0)}, 1);
         System.out.println(t.shapeInfoToString());
 
         //HashMap<String, INDArray> grandNum = network.numericalGradient(x, t);
