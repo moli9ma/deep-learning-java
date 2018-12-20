@@ -134,8 +134,10 @@ public class SimpleConvolutionNet implements Network {
     @Override
     public INDArray predict(INDArray x) {
         for (String key : this.layers.keySet()) {
+/*
             System.out.println("key : " + key);
             System.out.println(x.shapeInfoToString());
+*/
             x = layers.get(key).forward(x);
         }
         return x;
@@ -145,13 +147,14 @@ public class SimpleConvolutionNet implements Network {
     public double loss(INDArray input, INDArray t) {
         INDArray y = this.predict(input);
 
+/*
         System.out.println("softmax input y : ");
         System.out.println(y);
         System.out.println(y.shapeInfoToString());
-
         System.out.println("softmax input t : ");
         System.out.println(t);
         System.out.println(t.shapeInfoToString());
+*/
 
         return this.lastLayer.forward(y, t);
     }

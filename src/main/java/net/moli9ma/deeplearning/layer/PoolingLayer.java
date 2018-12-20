@@ -49,8 +49,10 @@ public class PoolingLayer implements Layer {
         int outWidth = 1 + (width - this.poolWidth) / this.stride;
         ConvolutionParameter parameter = new ConvolutionParameter(width, height, this.poolWidth, this.poolHeight, padding, padding, stride, stride);
         INDArray col = ConvolutionUtil.Im2col4D(x, parameter);
+/*
         System.out.println("col.shape");
         System.out.println(col.shapeInfoToString());
+*/
 
         col = col.reshape(new int[]{-1, this.poolHeight * this.poolWidth});
 
@@ -63,19 +65,25 @@ public class PoolingLayer implements Layer {
 
     @Override
     public INDArray backward(INDArray x) {
+/*
         System.out.println("x : ");
         System.out.println(x);
+*/
         x = x.permute(0, 2, 3, 1);
+
+/*
         System.out.println("x : ");
         System.out.println(x.shapeInfoToString());
-
         System.out.println("x flat: ");
+*/
 
         INDArray flatten = x.reshape(this.argMax.size(0), 1);
 
+/*
         System.out.println("arg max: ");
-        //System.out.println(this.argMax);
+        System.out.println(this.argMax);
         System.out.println(this.argMax.shapeInfoToString());
+*/
 
         int poolSize = this.poolWidth * this.poolHeight;
         INDArray dmax = Nd4j.zeros(this.argMax.size(0), poolSize);
@@ -84,9 +92,11 @@ public class PoolingLayer implements Layer {
             dmax.put(new INDArrayIndex[]{point(i), point(idx)}, flatten.getDouble(i));
         }
 
+/*
         System.out.println("dmax: ");
         System.out.println(dmax.shapeInfoToString());
         System.out.println(dmax);
+*/
 
         // col2Image
         INDArray out = Nd4j.zeros(new int[]{batchNumber, channelNumber, this.height, this.width});
@@ -122,51 +132,11 @@ public class PoolingLayer implements Layer {
             }
         }
 
+/*
         System.out.println("out");
         System.out.println(out.shapeInfoToString());
+*/
 
         return out;
     }
 }
-
-/*
-class Pooling:
-        def __init__(self, pool_h, pool_w, stride=1, pad=0):
-        self.pool_h = pool_h
-        self.pool_w = pool_w
-        self.stride = stride
-        self.pad = pad
-
-        self.x = None
-        self.arg_max = None
-
-        def forward(self, x):
-        N, C, H, W = x.shape
-        out_h = int(1 + (H - self.pool_h) / self.stride)
-        out_w = int(1 + (W - self.pool_w) / self.stride)
-
-        col = im2col(x, self.pool_h, self.pool_w, self.stride, self.pad)
-        col = col.reshape(-1, self.pool_h*self.pool_w)
-
-        arg_max = np.argmax(col, axis=1)
-        out = np.max(col, axis=1)
-        out = out.reshape(N, out_h, out_w, C).transpose(0, 3, 1, 2)
-
-        self.x = x
-        self.arg_max = arg_max
-
-        return out
-
-        def backward(self, dout):
-        dout = dout.transpose(0, 2, 3, 1)
-
-        pool_size = self.pool_h * self.pool_w
-        dmax = np.zeros((dout.size, pool_size))
-        dmax[np.arange(self.arg_max.size), self.arg_max.flatten()] = dout.flatten()
-        dmax = dmax.reshape(dout.shape + (pool_size,))
-
-        dcol = dmax.reshape(dmax.shape[0] * dmax.shape[1] * dmax.shape[2], -1)
-        dx = col2im(dcol, self.x.shape, self.pool_h, self.pool_w, self.stride, self.pad)
-
-        return dx
-*/

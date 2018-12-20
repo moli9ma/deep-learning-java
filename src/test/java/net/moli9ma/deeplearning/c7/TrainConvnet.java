@@ -6,6 +6,8 @@ import net.moli9ma.deeplearning.Trainer;
 import net.moli9ma.deeplearning.optimizer.AdamOptimizer;
 import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.indexing.INDArrayIndex;
+import org.nd4j.linalg.indexing.NDArrayIndex;
 
 import java.io.IOException;
 
@@ -16,19 +18,26 @@ public class TrainConvnet {
 
         MnistLoader train = new MnistLoader(MnistLoader.TrainImages, MnistLoader.TrainLabels);
         INDArray xTrain = train.normalizedImages();
+        System.out.println(xTrain.shapeInfoToString());
         int xTrainNumber = (int) xTrain.shape()[0];
         xTrain = xTrain.reshape(new int[]{xTrainNumber, 1, 28, 28});
+        xTrain = xTrain.get(new INDArrayIndex[]{NDArrayIndex.interval(0, 5000)});
+        System.out.println(xTrain.shapeInfoToString());
 
         INDArray tTrain = train.oneHotLabels();
-        /*int tTrainNumber = (int) tTrain.shape()[0];
-        tTrain = tTrain.reshape(new int[]{tTrainNumber, 1, 1, 10});*/
+        tTrain = tTrain.get(new INDArrayIndex[]{NDArrayIndex.interval(0, 5000)});
 
         MnistLoader test = new MnistLoader(MnistLoader.TestImages, MnistLoader.TestLabels);
         INDArray xTest = test.normalizedImages();
+        System.out.println(xTest.shapeInfoToString());
         xTest = xTest.reshape(new int[]{(int) xTest.shape()[0], 1, 28, 28});
+        xTest = xTest.get(new INDArrayIndex[]{NDArrayIndex.interval(0, 1000)});
+        System.out.println(xTest.shapeInfoToString());
 
         INDArray tTest = test.oneHotLabels();
-/*        tTest = tTest.reshape(new int[]{(int) tTest.shape()[0], 1, 28, 28});*/
+        System.out.println(tTest.shapeInfoToString());
+        tTest = tTest.get(new INDArrayIndex[]{NDArrayIndex.interval(0, 1000)});
+        System.out.println(tTest.shapeInfoToString());
 
         int maxEpoch = 20;
 
@@ -59,14 +68,14 @@ public class TrainConvnet {
         Trainer trainer = new Trainer(
                 network,
                 true,
-                new AdamOptimizer(0.001),
+                new AdamOptimizer(0.003),
                 xTrain,
                 tTrain,
                 xTest,
                 tTest,
                 maxEpoch,
                 100,
-                1000);
+                100);
         trainer.train();
     }
 }
